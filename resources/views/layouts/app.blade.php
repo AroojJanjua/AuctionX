@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token() }}" />
-  <title>@yield('title', 'AuctionX')</title>
+  <title>@yield('title','AuctionX')</title>
   {{-- Bootstrap 5 CSS --}}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   {{-- Bootstrap Icons --}}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   {{-- Google Fonts --}}
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /> 
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   {{-- AuctionX CSS --}}
   <link rel="stylesheet" href="{{ asset('css/auctionx.css') }}" />
@@ -31,19 +31,16 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto ms-3 gap-1">
           <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('auctions.*') ? 'active' : '' }}">
+            <a class="nav-link {{ request()->routeIs('auctions.*') ? 'active' : '' }}"
+              href="{{ route('auctions.index') }}">
               <i class="bi bi-grid me-1"></i>View Items
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('favorites') ? 'active' : '' }}">
-              <i class="bi bi-substack me-1"></i>Blogs
-            </a>
-          </li>
           @auth
-            @if(auth()->user()->role === 'seller' || auth()->user()->role === 'admin')
+            @if(auth()->user()->role === 'seller')
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('seller.*') ? 'active' : '' }}"
+                href="{{ route('seller.dashboard') }}">
                 <i class="bi bi-tag me-1"></i>Sell
               </a>
             </li>
@@ -58,16 +55,15 @@
         </ul>
 
         {{-- Search Bar   --}}
-        <form method="GET" 
-              class="ax-search-form d-flex mx-auto mt-2 mt-lg-0">
+        <form method="GET" action="{{ route('auctions.index') }}" 
+        class="ax-search-form d-flex mx-auto mt-2 mt-lg-0">
           <input
             type="text"
             name="search"
             class="form-control"
-            placeholder="Search auctions, items..."
+            placeholder="search about auction..."
             value="{{ request('search') }}"
-            autocomplete="off"
-          />
+            autocomplete="off"/>
           <button type="submit" class="btn-search" title="Search">
             <i class="bi bi-search"></i>
           </button>
@@ -89,7 +85,7 @@
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm border" style="border-color:var(--border)!important;border-radius:12px;font-family:'Nunito',sans-serif">
                 <li>
-                  <a class="dropdown-item">
+                  <a class="dropdown-item" href="{{ route('profile') }}">
                     <i class="bi bi-person me-2"></i>My Profile
                   </a>
                 </li>
@@ -147,6 +143,7 @@
             Bid. Win. Own Something Remarkable
           </div>
         </div>
+
         <div class="col-md-8">
           <div class="d-flex flex-wrap justify-content-md-center gap-3">
             <a href="{{ route('home') }}"
@@ -164,14 +161,15 @@
             class="footer-link">Support</a>
             <a href="{{ route('contact') }}"       
             class="footer-link">Contact</a>
-
           </div>
         </div>
+
         <div class="col-md-2 text-md-end">
           <div style="font-size:0.78rem;color:var(--muted)">
             &copy; {{ date('Y') }} AuctionX All rights reserved.
           </div>
         </div>
+        
       </div>
     </div>
   </footer>

@@ -14,20 +14,20 @@
           <h1>Bid, Win & Own Something Remarkable</h1>
           <p class="lead mt-3" style="color:var(--muted)">
             Browse timed auctions for art, watches, vehicles, 
-            jewelry, and collectibles with reserve price protection 
-            and Buy Now options.
+            jewelry, collectibles and electronics. 
           </p>
           <div class="d-flex flex-wrap gap-2 mt-4">
-            <a 
-             class="btn btn-brown px-4 py-2">
-              <i class="bi bi-grid me-2"></i>View Items
+            <a href="{{ route('auctions.index') }}" 
+             class="btn btn-brown px-4 py-2">View Items
             </a>
-            <a 
-             class="btn btn-brown-outline px-4 py-2">
-              <i class="bi bi-tag me-2"></i>Start Selling
+            <a href="{{ route('register') }}"
+             class="btn btn-brown-outline px-4 py-2">Start Selling
             </a>
           </div>
+
         </div>
+
+        {{-- Right: Featured Live Auction Card --}}
         <div class="col-lg-6">
           <div class="feat-card">
             <div class="feat-card-img">
@@ -110,6 +110,8 @@
         <button class="filter-btn" data-filter="vehicles">Vehicles</button>
         <button class="filter-btn" data-filter="jewelry">Jewelry</button>
         <button class="filter-btn" data-filter="collectibles">Collectibles</button>
+        <button class="filter-btn" data-filter="collectibles">Electronics</button>
+
       </div>
         <div class="row g-3" id="auctionGrid">
           {{-- 1 --}}       

@@ -29,29 +29,6 @@
     </div>
     @endforeach
   </div>
-  {{-- Auction Types --}}
-  <div class="mb-5">
-    <h3 style="font-size:1.2rem;font-weight:800;color:var(--br);margin-bottom:1.5rem">
-      <i class="bi bi-clock me-2"></i>Selling Types
-    </h3>
-    <div class="row g-3">
-      @foreach([
-        ['Timed Auction',   'bi-clock',     'badge-timed',  'Bidding opens and closes at set times. Place your bid anytime before the timer runs out. The highest bid when time expires wins.'],
-        ['Buy Now',         'bi-bag-check', 'badge-buynow', 'Skip the bidding and purchase instantly at the fixed Buy Now price. Available on select listings alongside regular bidding.'],
-      ] as [$type, $icon, $badge, $desc])
-      <div class="col-md-6">
-        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.2rem">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <i class="bi {{ $icon }}" style="font-size:1.2rem;color:var(--br)"></i>
-            <span class="fw-bold">{{ $type }}</span>
-            <span class="badge rounded-pill {{ $badge }} ms-auto">{{ $type }}</span>
-          </div>
-          <p style="font-size:0.88rem;color:var(--muted);margin:0">{{ $desc }}</p>
-        </div>
-      </div>
-      @endforeach
-    </div>
-  </div>
   
   {{-- FAQ --}}
   <div class="mb-5">
