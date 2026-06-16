@@ -30,7 +30,13 @@
  
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto ms-3 gap-1">
-          <li class="nav-item">
+         <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}"
+              href="{{ route('home') }}">
+              <i class="bi bi-house me-1"></i>Home
+            </a>
+          </li>
+        <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('auctions.*') ? 'active' : '' }}"
               href="{{ route('auctions.index') }}">
               <i class="bi bi-grid me-1"></i>View Items
@@ -90,15 +96,8 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" 
-                  >
+                  <a class="dropdown-item"  href="{{ route('my-bids') }}">
                     <i class="bi bi-hammer me-2"></i>My Bids
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" 
-                  >
-                    <i class="bi bi-heart me-2"></i>Favorites
                   </a>
                 </li>
                 @if(auth()->user()->role === 'admin')
@@ -111,7 +110,7 @@
                 @endif
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                  <form method="POST">
+                  <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="dropdown-item text-danger">
                       <i class="bi bi-box-arrow-right me-2"></i>Sign Out

@@ -151,9 +151,8 @@
                     </span>
   
                   @if($auction->ends_soon)
-                    <span class="badge rounded-pill"
-                          style="background:var(--red);color:#fff;font-size:.7rem">
-                      Ending Soon
+                    <span class="badge rounded-pill badge-closed">
+                      <i class="bi bi-clock me-1"></i>Ending Soon
                     </span>
                   @endif
                 </div>
@@ -174,11 +173,11 @@
                     <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">
                       Current Bid
                     </div>
-                    <span class="auction-price">${{ number_format($auction->current_bid) }}</span>
+                    <span class="auction-price">PKR {{ number_format($auction->current_bid) }}</span>
                   </div>
                   <div class="text-end">
-                    <div style="font-size:.7rem;color:var(--muted)"> added later
-                      {{-- {{ $auction->bids_count }} {{ Str::plural('bid', $auction->bids_count) }} --}}
+                    <div style="font-size:.7rem;color:var(--muted)">
+                      {{ $auction->bids_count }} {{ Str::plural('bid', $auction->bids_count) }} 
                     </div>
                     <span class="auction-timer {{ $auction->ends_soon ? 'ending' : '' }}">
                       <i class="bi bi-clock me-1"></i>{{ $auction->time_remaining }}
@@ -190,24 +189,8 @@
                 <div class="d-flex gap-2">
                 <a href="{{ route('auctions.show', $auction->id) }}"
                        class="btn btn-brown btn-sm flex-grow-1">
-                      <i class="bi bi-hammer me-1"></i>Place Bid
+                      Place Bid
                     </a>
-                @auth
-                    <form method="POST"
-                          {{-- action="{{ route('favorites.store', $auction->id) }}" --}}
-                          style="margin:0">
-                      @csrf
-                      <button type="submit" class="btn btn-ghost-ax btn-sm"
-                              title="Save to Favorites">
-                        <i class="bi bi-heart"></i>
-                      </button>
-                    </form>
-                  @else
-                    <a href="{{ route('login') }}"
-                       class="btn btn-ghost-ax btn-sm" title="Login to save">
-                      <i class="bi bi-heart"></i>
-                    </a>
-                  @endauth
                 </div>
 
             </div>

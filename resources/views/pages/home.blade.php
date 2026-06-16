@@ -2,11 +2,11 @@
 @section('title','AuctionX')
 @section('content')
 
-{{-- HERO SECTION --}}
+{{-- hero section --}}
 <section class="hero-section">
-<div class="container">
+  <div class="container">
       <div class="row align-items-center g-4">
-        {{-- Left: Headline --}}
+          {{-- Left: Headline --}}
         <div class="col-lg-6">
           <div class="hero-tag">
             <span class="dot-live"></span> Timed auctions happening now
@@ -24,40 +24,58 @@
              class="btn btn-brown-outline px-4 py-2">Start Selling
             </a>
           </div>
-
         </div>
 
-        {{-- Right: Featured Live Auction Card --}}
+          {{-- Right: Featured Live Auction Card --}}
         <div class="col-lg-6">
-          <div class="feat-card">
-            <div class="feat-card-img">
-                     <img src="{{ asset('images\Car1.jpeg') }}"  alt="Car"
-                     class="w-100 h-100" style="object-fit:cover">
-                <span class="badge-status-abs">
-                  <i class="bi bi-check-circle me-1"></i>Reserve Met
-                </span>
-            </div>
-            <div class="p-3">
-              <div class="fw-bold fs-6">
-                Hyundai Grand i10 Nios</div>
-              <div class="auction-sub mb-3">
-                Arooj Janjua     
-                &bull;
-                 10 bids placed
-              </div>
-
-              <div class="d-flex justify-content-between align-items-end mb-3">
-                <div>
-                  <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">
-                    Current bid
-                  </div>
-                  <div class="bid-amount">
-                    $14,999
+         @if($featured)
+          <div class="auction-card h-100">
+          {{-- Card Image --}}
+            <div class="auction-card-img {{ $featured->category }}">
+              @if($featured->image)
+                <img src="{{ asset('storage/' . $featured->image) }}" alt="{{ $featured->title }}"
+                    class="w-100 h-100" style="object-fit:cover">
+              @else
+                <div class="auction-img-icon">
+                  @switch($featured->category)
+                    @case('art')         <i class="bi bi-palette"   style="color:var(--br)"></i>       @break
+                    @case('watches')     <i class="bi bi-watch"     style="color:#1A4A8A"></i>         @break
+                    @case('vehicles')    <i class="bi bi-car-front" style="color:var(--green)"></i>    @break
+                    @case('jewelry')     <i class="bi bi-gem"       style="color:#E65100"></i>         @break
+                    @case('collectibles')<i class="bi bi-box"       style="color:#7B1FA2"></i>         @break
+                    @default             <i class="bi bi-laptop"    style="color:#1A4A8A"></i>
+                  @endswitch
                 </div>
+              @endif
+              <div class="auction-card-badges">
+                <span class="badge rounded-pill badge-timed">
+                  <i class="bi bi-clock me-1"></i>Live
+                </span>
+                @if($featured->ends_soon)
+                <span class="badge rounded-pill badge-closed">
+                  <i class="bi bi-clock me-1"></i>Ending Soon
+                </span>
+                @endif
+              </div>
+            </div>
+
+            {{-- Card Body --}}
+            <div class="p-3">
+              <div class="auction-title mb-1">{{ Str::limit($featured->title,45) }}</div>
+              <div class="auction-sub mb-2">{{ $featured->category_label }} &bull; {{ $featured->seller->name }}</div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Current Bid</div>
+                  <span class="auction-price">PKR {{ number_format($featured->current_bid) }}</span>
                 </div>
                 <div class="text-end">
                   <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px">Ends in</div>
-                  <div class="d-flex gap-1">
+                  <div class="d-flex gap-1" id="featTimer" data-ends="{{ $featured->ends_at->timestamp }}">
+                    <div class="countdown-unit">
+                      <span class="countdown-num" id="feat-d">00</span>
+                      <span class="countdown-lbl">days</span>
+                    </div>
                     <div class="countdown-unit">
                       <span class="countdown-num" id="feat-h">00</span>
                       <span class="countdown-lbl">hrs</span>
@@ -74,35 +92,27 @@
                 </div>
               </div>
 
-              <div class="d-grid gap-2 d-sm-flex">
-                <a 
-                   class="btn btn-brown flex-grow-1 py-2">
-                  <i class="bi bi-hammer me-1"></i> Place Bid
-                </a>
-                <button class="btn btn-ghost-ax px-3 py-2"
-                        title="Add to Favorites">
-                  <i class="bi bi-heart"></i>
-                </button>
+              <div class="d-grid gap-2">
+                <a href="{{ route('auctions.show', $featured->id) }}" class="btn btn-brown btn-sm">Place Bid</a>
               </div>
             </div>
           </div>
+          @endif
         </div>
-      </div>
+    </div>
 </div>
 </section>
 
-{{-- FEATURED AUCTIONS --}}
+{{-- featured auctions --}}
 <section class="py-5">
     <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="section-title">Featured Auctions</div>
-        <a 
-        class="see-all-btn">
-          View all <i class="bi bi-arrow-right"></i>
-        </a>
+        <a href="{{ route('auctions.index') }}" class="see-all-btn">
+          View all <i class="bi bi-arrow-right"></i></a>
       </div>
 
-      {{-- Category Filters --}}
+    {{-- Category Filters --}}
       <div class="d-flex flex-wrap gap-2 mb-4" id="filterBar">
         <button class="filter-btn active" data-filter="all">All</button>
         <button class="filter-btn" data-filter="art">Art</button>
@@ -110,245 +120,95 @@
         <button class="filter-btn" data-filter="vehicles">Vehicles</button>
         <button class="filter-btn" data-filter="jewelry">Jewelry</button>
         <button class="filter-btn" data-filter="collectibles">Collectibles</button>
-        <button class="filter-btn" data-filter="collectibles">Electronics</button>
-
-      </div>
-        <div class="row g-3" id="auctionGrid">
-          {{-- 1 --}}       
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/Rolex Watch.jpeg') }}" alt="Watch"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Rolex Watch</div>
-      <div class="auction-sub mb-2">Watches &bull; Ahmad</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$5,999</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
+        <button class="filter-btn" data-filter="electronics">Electronics</button>
       </div>
 
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $11,999</a>
-          
+      @if($auctions->isEmpty())
+        <div class="text-center py-5" style="color:var(--muted)">
+          <i class="bi bi-hourglass-split" style="font-size:2rem;display:block;margin-bottom:.5rem"></i>
+          No active auctions right now. Check back soon!
         </div>
+
+      @else
+      <div class="row g-3" id="auctionGrid">
+          @foreach($auctions as $auction)
+          <div class="col-sm-6 col-lg-3 auction-item" data-category="{{ $auction->category }}">
+            <div class="auction-card h-100">
+            {{-- card image --}}
+              <div class="auction-card-img {{ $auction->category }}">
+                @if($auction->image)
+                  <img src="{{ asset('storage/' . $auction->image) }}"
+                       class="w-100 h-100" style="object-fit:cover"
+                       alt="{{ $auction->title }}">
+                @else
+                  <div class="auction-img-icon">
+                    @switch($auction->category)
+                      @case('art')         <i class="bi bi-palette"   style="color:var(--br)"></i>       @break
+                      @case('watches')     <i class="bi bi-watch"     style="color:#1A4A8A"></i>       @break
+                      @case('vehicles')    <i class="bi bi-car-front" style="color:var(--green)"></i>    @break
+                      @case('jewelry')     <i class="bi bi-gem"       style="color:#E65100"></i>       @break
+                      @case('collectibles')<i class="bi bi-box"       style="color:#7B1FA2"></i>       @break
+                      @default             <i class="bi bi-laptop"    style="color:#1A4A8A"></i>
+                    @endswitch
+                  </div>
+                @endif
+
+                <div class="auction-card-badges">
+                  <span class="badge rounded-pill badge-timed">
+                    <i class="bi bi-clock me-1"></i>Live
+                  </span>
+                  @if($auction->ends_soon)
+                    <span class="badge rounded-pill badge-closed">
+                      <i class="bi bi-clock me-1"></i>Ending Soon
+                    </span>
+                  @endif
+                </div>
+              </div>
+
+              {{-- Card body --}}
+              <div class="p-3">
+                <div class="auction-title mb-1">
+                  {{ Str::limit($auction->title, 45) }}
+                </div>
+                <div class="auction-sub mb-2">
+                  {{ $auction->category_label }} &bull; {{ $auction->seller->name }}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">
+                      Current Bid
+                    </div>
+                    <span class="auction-price">PKR {{ number_format($auction->current_bid) }}</span>
+                  </div>
+                  <div class="text-end">
+                    <div style="font-size:.7rem;color:var(--muted)">
+                      {{ $auction->bids_count }} {{ Str::plural('bid', $auction->bids_count) }}
+                    </div>
+                    <span class="auction-timer {{ $auction->ends_soon ? 'ending' : '' }}">
+                      <i class="bi bi-clock me-1"></i>{{ $auction->time_remaining }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                  <a href="{{ route('auctions.show', $auction->id) }}"
+                     class="btn btn-brown btn-sm">
+                    Place Bid
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          @endforeach
       </div>
-    </div>
-  </div>
-        </div>
-        {{-- 2 --}}       
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/Royal Jewelry.jpeg') }}" alt="Jewelry"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Royal Jewelry</div>
-      <div class="auction-sub mb-2">Jewelry &bull; Arooj</div>
+      @endif
 
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$5,499</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
+      <div id="noResults" class="text-center py-5" style="color:var(--muted);display:none">
+        <i class="bi bi-search" style="font-size:2rem;display:block;margin-bottom:.5rem"></i>
+        No auctions found in this category.
       </div>
-
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $11,499</a>
-
-        </div>
-      </div>
-    </div>
-  </div>
-        </div>
-        {{-- 3 --}}       
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/iphone.jpeg') }}" alt="Iphone"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Iphone</div>
-      <div class="auction-sub mb-2">Collectibles &bull; Bismah</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$4,999</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
-      </div>
-
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $9,990</a>
-        </div>
-      </div>
-    </div>
-  </div>
-        </div>
-  {{-- 4 --}}      
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/Girly Watch.jpeg') }}" alt="Blashon"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Girly Watch</div>
-      <div class="auction-sub mb-2">Watches &bull; Laiba</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$4,799</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
-      </div>
-
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $7,599</a>
-        </div>
-      </div>
-    </div>
-  </div>
-        </div>
-      {{-- 5 --}}     
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/earbuds.jpeg') }}" alt="Blashon"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Ear Buds</div>
-      <div class="auction-sub mb-2">Collectibles &bull; Jasim</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$1,999</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
-      </div>
-
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $2,999</a>
-        </div>
-      </div>
-    </div>
-  </div>
-        </div>
-        {{-- 6 --}}    
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/pendant.jpeg') }}" alt="Blashon"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Antique Pendant</div>
-      <div class="auction-sub mb-2">Jewelry &bull; Habeeb</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$1,699</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
-      </div>
-
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $1,999</a>
-
-        </div>
-      </div>
-    </div>
-  </div>
-        </div>
-         {{-- 7    --}}
-        <div class="col-sm-6 col-lg-3 auction-item">
-      <div class="auction-card">
-    {{-- Card Image --}}
-    <div class="auction-card-img">
-      <img src="{{ asset('images/headphones.jpeg') }}" alt="Blashon"
-           class="w-100 h-100" style="object-fit:cover">
-           <div class="auction-card-badges">
-      <span class="badge rounded-pill badge-timed">Timed</span>
-           </div>
-    </div>
-    {{-- Card Body --}}
-    <div class="p-3">
-      <div class="auction-title mb-1">Headphone</div>
-      <div class="auction-sub mb-2">Collectibles &bull; Faiza</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="auction-price">$999</span>
-        <span class="auction-timer">
-          <i class="bi bi-clock me-1"></i>00:00:00
-        </span>
-      </div>
-
-      <div class="d-grid gap-2">
-        <a class="btn btn-brown btn-sm">Place Bid</a>
-
-        <div class="d-flex gap-2">
-          <a class="btn btn-green btn-sm flex-grow-1">Buy $1,999</a>
-        </div>
-      </div>
-    </div>
-  </div>
-        </div>
-  </div>
 </div>   
 </section>
 
@@ -363,11 +223,11 @@
       </div>
       <div class="row g-4 mb-5">
      @foreach([
-      ['1','bi-person-plus',   'Create Your Account',  'Register as a bidder or seller in minutes. Verify your email and complete your profile to get started.'],
-      ['2','bi-grid',          'Browse Listings',       'Explore thousands of auctions across art, watches, vehicles, jewelry, collectibles and more. Use filters to find exactly what you want.'],
-      ['3','bi-hammer',        'Place Your Bid',        'Enter your bid amount — must be above the current bid. Use auto-bid to let the system bid on your behalf up to your maximum.'],
-      ['4','bi-trophy',        'Win the Auction',       'When the timer ends, the highest bidder wins. You\'ll receive an instant notification with payment instructions.'],
-      ['5','bi-bag-check',     'Secure Checkout',       'Complete your purchase securely using escrow. AuctionX provides buyer protection for every transaction to ensure safety and trust.'],
+      ['1','bi-person-plus','Create Your Account','Register as a bidder or seller in minutes. Verify your email and complete your profile to get started.'],
+      ['2','bi-grid',       'Browse Listings',    'Explore thousands of auctions across art, watches, vehicles, jewelry, collectibles and more. Use filters to find exactly what you want.'],
+      ['3','bi-hammer',     'Place Your Bid',     'Enter your bid amount that must be above the current bid. Use auto-bid to let the system bid on your behalf up to your maximum.'],
+      ['4','bi-trophy',     'Win the Auction',    'When the timer ends, the highest bidder wins. You\'ll receive an instant notification with payment instructions.'],
+      ['5','bi-bag-check',  'Secure Checkout',    'Complete your purchase securely using escrow. AuctionX provides buyer protection for every transaction to ensure safety and trust.'],
     ] as [$n, $icon, $title, $desc])
     <div class="col-md-6 col-lg-4">
       <div class="step-card">
@@ -381,11 +241,66 @@
   </div>
       <div class="text-center mt-4">
         <a 
-        {{-- href="{{ route('register') }}" --}}
-         class="btn btn-brown px-5 py-2">
-          Get Started Free
-        </a>
+        href="{{ route('register') }}" class="btn btn-brown px-5 py-2">Get Started Free</a>
       </div>
     </div>
   </section>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  // Live countdown for featured auction card
+  const featTimer=document.getElementById('featTimer');
+  if (featTimer){
+    const endsAt=parseInt(featTimer.dataset.ends, 10) * 1000;
+    const dEl=document.getElementById('feat-d');
+    const hEl=document.getElementById('feat-h');
+    const mEl=document.getElementById('feat-m');
+    const sEl=document.getElementById('feat-s');
+
+    function tickFeatured(){
+      const diff=Math.max(0, Math.floor((endsAt - Date.now()) / 1000));
+      const d=Math.floor(diff / 86400);
+      const h=Math.floor((diff % 86400) / 3600);
+      const m=Math.floor((diff % 3600) / 60);
+      const s=diff % 60;
+
+      dEl.textContent=String(d).padStart(2,'0');
+      hEl.textContent=String(h).padStart(2,'0');
+      mEl.textContent=String(m).padStart(2,'0');
+      sEl.textContent=String(s).padStart(2,'0');
+
+      if(diff > 0) 
+         setTimeout(tickFeatured,1000);
+    }
+    tickFeatured();
+  }
+
+  const filterBtns=document.querySelectorAll('#filterBar .filter-btn');
+  const items=document.querySelectorAll('#auctionGrid .auction-item');
+  const noResults =document.getElementById('noResults');
+
+  filterBtns.forEach(btn=>{
+    btn.addEventListener('click', function(){
+      filterBtns.forEach(b=>b.classList.remove('active'));
+      this.classList.add('active');
+
+      const filter=this.dataset.filter;
+      let visibleCount=0;
+
+      items.forEach(item=>{
+        const match = (filter === 'all' || item.dataset.category === filter);
+        item.style.display = match ? '' : 'none';
+        if(match) 
+          visibleCount++;
+      });
+
+      if(noResults){
+        noResults.style.display = visibleCount === 0 ? '' : 'none';
+      }
+    });
+  });
+});
+</script>
+@endpush

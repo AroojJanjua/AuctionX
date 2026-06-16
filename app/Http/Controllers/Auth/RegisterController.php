@@ -46,6 +46,14 @@ class RegisterController extends Controller
 
         Auth::login($user);
         
-        return redirect()->route('home')->with('success', 'Welcome to AuctionX! Start exploring auctions.');
+        // Redirect based on role
+        if ($user->role === 'seller') {
+            return redirect()->route('seller.dashboard')
+                ->with('success', 'Welcome to AuctionX! Your seller account is ready.');
+        }
+
+        return redirect()->route('home')
+            ->with('success', 'Welcome to AuctionX! Start exploring auctions.');
     }
 }
+

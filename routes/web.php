@@ -7,21 +7,24 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BidController;
+
 
 //    1. PUBLIC ROUTES(guests + loggin users)
 // Home
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/',             [HomeController::class, 'index'])->name('home');
 // Static pages
 Route::get('/how-it-works', [HomeController::class, 'howItWorks'])->name('how-it-works');
-Route::get('/about',   [HomeController::class, 'about'])->name('about');
-Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
-Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
-Route::get('/terms',   [HomeController::class, 'terms'])->name('terms');
-Route::get('/support', [HomeController::class, 'support'])->name('support');
+Route::get('/about',        [HomeController::class, 'about'])->name('about');
+Route::get('/contact',      [HomeController::class, 'contact'])->name('contact');
+Route::get('/privacy',      [HomeController::class, 'privacy'])->name('privacy');
+Route::get('/terms',        [HomeController::class, 'terms'])->name('terms');
+Route::get('/support',      [HomeController::class, 'support'])->name('support');
+
 
 Route::prefix('auctions')->name('auctions.')->group(function (){
-    Route::get('/',        [AuctionController::class, 'index'])->name('index');  
-    Route::get('/{id}',    [AuctionController::class, 'show'])->name('show');   
+    Route::get('/',         [AuctionController::class, 'index'])->name('index');  
+    Route::get('/{id}',     [AuctionController::class, 'show'])->name('show');   
 });
 
 
@@ -37,11 +40,21 @@ Route::middleware('guest')->group(function(){
 
 
 Route::middleware('auth')->group(function(){
+    // Logout 
+    Route::post('/logout',          [LoginController::class, 'logout'])->name('logout');
     // Profile
-    Route::get('/profile',        [ProfileController::class, 'show'])->name('profile');
-    Route::get('/profile/edit',   [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile',        [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password',[ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/profile',          [ProfileController::class, 'show'])->name('profile');
+    Route::get('/profile/edit',     [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile',          [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    // My Bids
+    Route::get('/my-bids',          [BidController::class, 'myBids'])->name('my-bids');
+
+});
+
+
+Route::middleware(['auth', 'role:bidder,seller,admin'])->group(function () {
+    Route::post('/auctions/{auction}/bid',[BidController::class, 'store'])->name('auctions.bid');
 });
 
 

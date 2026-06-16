@@ -9,8 +9,8 @@ use Illuminate\Validation\Rules\Password;
 class ProfileController extends Controller
 {
     public function show(){
-         $user = auth()->user();
-        return view('pages.profile.show', compact('user'));
+        $user=auth()->user()->load('bids.auction')->loadCount(['bids','auctions']);
+        return view('pages.profile.show',compact('user'));
     }
 
     public function edit(){
@@ -19,7 +19,7 @@ class ProfileController extends Controller
 
     // Update profile personal information
     public function update(Request $request){
-        $user = auth()->user();
+        $user=auth()->user();
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -30,24 +30,24 @@ class ProfileController extends Controller
             'bio'     => 'nullable|string|max:500',
         ]);
         $user->update($validated);
-        return back()->with('success', 'Profile updated successfully.');
+        return back()->with('success','Profile updated successfully.');
     }
 
     // Update password
     public function updatePassword(Request $request){
-        $user = auth()->user();
+        $user=auth()->user();
         $request->validate([
             'current_password'=> 'required',
             'password'        => ['required','confirmed',Password::min(8)],
         ]);
         
-        if (!Hash::check($request->current_password, $user->password)){
+        if(!Hash::check($request->current_password, $user->password)){
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
         $user->update([
             'password' => Hash::make($request->password),
         ]);
-        return back()->with('success', 'Password updated successfully.');
+        return back()->with('success','Password updated successfully.');
     }
 
 

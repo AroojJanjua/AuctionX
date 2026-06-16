@@ -6,7 +6,7 @@
     <div class="container">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-          <h2><i class="bi bi-tag me-2"></i>Seller Dashboard</h2>
+          <h2>Seller Dashboard</h2>
           <p>Welcome back, {{ auth()->user()->name }}</p>
         </div>
         <a href="{{ route('seller.create') }}" class="btn btn-brown px-4">
@@ -21,6 +21,7 @@
     <div class="row g-3 mb-4">
       @foreach([
         ['Active Listings', $stats['active']],
+        ['Total Bids',      $stats['bids']],
         ['Items Sold',      $stats['sold']],
         ['Total Earned',    'Rs. '.number_format($stats['earned'])],
       ] as [$label,$val])
@@ -42,14 +43,6 @@
       <div class="d-flex justify-content-between align-items-center p-3"
            style="border-bottom:1px solid var(--border)">
         <div class="section-title">My Listings</div>
-        {{-- <div class="d-flex gap-2">
-          <select class="form-select-ax" style="width:auto;font-size:0.82rem">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Ended</option>
-            <option>Draft</option>
-          </select>
-        </div> --}}
       </div>
 
       @if($listings->isEmpty())
@@ -81,23 +74,32 @@
                   <div style="font-size:0.75rem;color:var(--muted)">{{ ucfirst($listing->category) }}</div>
                 </td>
                 <td style="padding:12px 16px;vertical-align:middle;font-weight:700;color:var(--br)">
-                  ${{ number_format($listing->current_bid) }}
+                  PKR {{ number_format($listing->current_bid) }}
                 </td>
                 <td style="padding:12px 16px;vertical-align:middle;color:var(--muted)">
-                  {{-- {{ $listing->bids_count }} --}}
+                  <a href="{{ route('seller.bids', $listing->id) }}"
+                  style="color:var(--br);font-weight:600;text-decoration:none;">
+                     {{ $listing->bids_count }}
+                  </a>
                 </td>
                 <td style="padding:12px 16px;vertical-align:middle;color:var(--muted);font-size:0.82rem">
                   {{ $listing->ends_at->format('M d, Y') }}<br>
                   {{ $listing->ends_at->format('h:i A') }}
                 </td>
                 <td style="padding:12px 16px;vertical-align:middle">
-                  @switch($listing->status)
+                  @php
+                    $displayStatus = $listing->status;
+                    if($listing->status === 'active' && $listing->ends_at->isPast()){
+                        $displayStatus = 'closed';
+                    }
+                  @endphp
+                  @switch($displayStatus)
                     @case('active')
-                      <span class="badge rounded-pill badge-buynow">Active</span> @break
+                      <span class="badge rounded-pill badge-timed">Active</span> @break
                     @case('closed')
-                      <span class="badge rounded-pill badge-closed2">Closed</span> @break
+                      <span class="badge rounded-pill badge-closed">Closed</span> @break
                     @case('draft')
-                      <span class="badge rounded-pill badge-reserve2">Draft(check badge)</span> @break
+                      <span class="badge rounded-pill badge-drafted">Draft</span> @break
                   @endswitch
                 </td>
                 <td style="padding:12px 16px;vertical-align:middle">
@@ -110,16 +112,14 @@
                        class="btn btn-ghost-ax btn-sm" title="Edit">
                       <i class="bi bi-pencil"></i>
                     </a>
-                    {{-- <form method="POST"
-                          action="{{ route('seller.destroy', $listing->id) }}"
-                          onsubmit="return confirm('Are you sure you want to delete this listing?')">
+                    <form method="POST" action="{{ route('seller.destroy', $listing->id) }}"
+                      onsubmit="return confirm('Are you sure you want to delete this listing?')">
                       @csrf @method('DELETE')
-                      <button type="submit" class="btn btn-sm"
-                              style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)"
-                              title="Delete">
+                      <button type="submit" class="btn btn-sm" 
+                      style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)" title="Delete">
                         <i class="bi bi-trash"></i>
                       </button>
-                    </form> --}}
+                    </form>
                   </div>
                 </td>
               </tr>

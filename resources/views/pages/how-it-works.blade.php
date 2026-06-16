@@ -15,7 +15,7 @@
     @foreach([
       ['1','bi-person-plus',   'Create Your Account',  'Register as a bidder or seller in minutes. Verify your email and complete your profile to get started.'],
       ['2','bi-grid',          'Browse Listings',       'Explore thousands of auctions across art, watches, vehicles, jewelry, collectibles and more. Use filters to find exactly what you want.'],
-      ['3','bi-hammer',        'Place Your Bid',        'Enter your bid amount — must be above the current bid. Use auto-bid to let the system bid on your behalf up to your maximum.'],
+      ['3','bi-hammer',        'Place Your Bid',        'Enter your bid amount that must be above the current bid. Use auto-bid to let the system bid on your behalf up to your maximum.'],
       ['4','bi-trophy',        'Win the Auction',       'When the timer ends, the highest bidder wins. You\'ll receive an instant notification with payment instructions.'],
       ['5','bi-bag-check',     'Secure Checkout',       'Complete your purchase securely using escrow. AuctionX provides buyer protection for every transaction to ensure safety and trust.'],
     ] as [$n, $icon, $title, $desc])

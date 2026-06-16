@@ -217,7 +217,7 @@ a:hover{
   border: 1px solid var(--green-bd);
 }
 .bid-amount{
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--br);
 }
@@ -241,34 +241,20 @@ a:hover{
 }
 /* Badges */
 .badge-timed{ 
-    background: var(--br-pale);  
-    color: var(--br);    
-    border: 1px solid var(--br-soft); 
-    font-size: 0.68rem; 
-    font-weight: 700; 
-}
-.badge-live2{ 
-  background: var(--red-bg);   
-  color: var(--red);   
-  border: 1px solid var(--red-bd);  
-  font-size: 0.68rem; 
-  font-weight: 700; 
-}
-.badge-buynow{ 
-  background: var(--green-bg); 
+    background: var(--green-bg); 
   color: var(--green); 
   border: 1px solid var(--green-bd);
   font-size: 0.68rem; 
-  font-weight: 700; 
+  font-weight: 700;  
 }
-.badge-reserve2{ 
+.badge-drafted{ 
   background: #FFF8E1; 
   color: #795548; 
   border: 1px solid #D7CCC8; 
   font-size: 0.68rem; 
   font-weight: 700; 
 }
-.badge-closed2{ 
+.badge-closed{ 
   background: var(--red-bg);   
   color: var(--red);   
   border: 1px solid var(--red-bd);  
@@ -281,7 +267,7 @@ a:hover{
 }
 .badge-seller{ 
   background: #F5EDE3; 
-  color: #6B3F1F; 
+  color: #636b1f; 
 }
 .badge-bidder{ 
   background: var(--color-background-success,#E8F5E9); 
@@ -490,6 +476,26 @@ a:hover{
   border-color: var(--br); 
   outline: none; 
   box-shadow: 0 0 0 3px rgba(107,63,31,0.1); 
+}
+.form-section{
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.form-section-title{
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--br);
+  margin-bottom: 1.1rem;
+  padding-bottom: .7rem;
+  border-bottom: 1px solid var(--border);
+}
+.field-error{
+  font-size: .78rem;
+  color: var(--red);
+  margin-top: 4px;
 }
 .divider-text{
   display: flex;

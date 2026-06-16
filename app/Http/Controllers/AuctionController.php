@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Auction;
+use App\Models\Bid;
 use Illuminate\Http\Request;
 
 class AuctionController extends Controller
 {
     public function index(Request $request){
+        
         $query=Auction::with('seller')
-            // ->withCount('bids')
+            ->withCount('bids')
             ->where('status', 'active');
+            // ->where('starts_at', '<=', now())
+            // ->where('ends_at', '>', now());
 
         // Search 
         if($request->filled('search')){
@@ -54,14 +58,25 @@ class AuctionController extends Controller
                 break;
         }
  
-        $total    = $query->count();
-        $auctions = $query->paginate(12)->withQueryString();
+        $total=$query->count();
+        $auctions=$query->paginate(12)->withQueryString();
  
         return view('pages.auctions.index',compact('auctions','total'));
     }
 
     public function show($id){
-        return view('pages.auctions.show');      
+        $auction=Auction::with('seller')
+            ->withCount('bids')
+            ->findOrFail($id);
+
+        $bids=Bid::with('bidder')
+            ->where('auction_id', $id)
+            ->orderByDesc('amount')
+            ->get();
+
+        $suggestion=$auction->ai_bid_suggestion;
+
+        return view('pages.auctions.show',compact('auction','bids','suggestion'));      
     }
 
     public static function timeRules():array{
@@ -76,6 +91,7 @@ class AuctionController extends Controller
                 'date',
                 'different:starts_at',   
                 'after:starts_at',      
-                ],];
+                ],
+            ];
     }
 }

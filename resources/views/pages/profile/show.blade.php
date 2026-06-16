@@ -26,7 +26,7 @@
         <div style="width:80px;height:80px;border-radius:50%;background:var(--br-pale);
         border:2px solid var(--br-soft);display:flex;align-items:center;justify-content:center;
         font-size:2rem;font-weight:800;color:var(--br);margin:0 auto 1rem">
-          {{ strtoupper(substr($user, 0, 2)) }}
+          {{ strtoupper(substr($user->name, 0, 2)) }}
         </div>
         <div style="font-size:1.1rem;font-weight:800;color:var(--text)">{{ $user->name }}</div>
         <div style="font-size:.83rem;color:var(--muted);margin-top:2px">{{ $user->email }}</div>
@@ -74,10 +74,9 @@
       <div style="background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden">
         <div class="d-flex justify-content-between align-items-center p-3" style="border-bottom:1px solid var(--border)">
           <div class="section-title" style="font-size:1rem">Recent Bids</div>
-          <a 
-          {{-- href="{{ route('my-bids') }}"  --}}
-          class="see-all-btn">View all</a>
-          {{-- @forelse($user->bids->take(5) as $bid)
+          <a href="{{ route('my-bids') }}" class="see-all-btn">View all</a>
+        </div>
+          @forelse($user->bids->take(5) as $bid)
         <div class="d-flex justify-content-between align-items-center p-3" style="border-bottom:1px solid var(--border)">
           <div>
             <div style="font-weight:700;font-size:.9rem">{{ Str::limit($bid->auction->title, 40) }}</div>
@@ -87,11 +86,9 @@
         </div>
         @empty
         <div class="text-center py-4" style="color:var(--muted);font-size:.88rem">No bids placed yet.</div>
-        @endforelse --}}
+        @endforelse
         </div>
       </div>
-      </div>
-
   </div>
 </div>
 

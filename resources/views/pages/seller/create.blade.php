@@ -192,39 +192,6 @@
   </div>
 @endsection
 
-@push('styles')
-<style>
-.form-section{
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.2rem;
-}
-.form-section-title{
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--br);
-  margin-bottom: 1.1rem;
-  padding-bottom: .7rem;
-  border-bottom: 1px solid var(--border);
-}
-.field-error{
-  font-size: .78rem;
-  color: var(--red);
-  margin-top: 4px;
-}
-/* .type-card{
-  display: block;
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: all .15s;
-} */
-</style>
-@endpush
-
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
