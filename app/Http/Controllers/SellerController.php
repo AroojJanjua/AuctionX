@@ -87,7 +87,7 @@ class SellerController extends Controller
             'starting_bid' => $validated['starting_bid'],
             'current_bid'  => $validated['starting_bid'],
             'image'        => $imagePath,
-            'status'       => 'active', // always draft bcoz needs admin approval
+            'status'       => 'draft', // always draft bcoz needs admin approval
         ]);
         return redirect()->route('seller.dashboard')
             ->with('success','Auction submitted for review. Admin will approve it shortly.');

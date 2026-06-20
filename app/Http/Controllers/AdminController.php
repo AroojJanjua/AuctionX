@@ -1,0 +1,198 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Auction;
+use App\Models\Bid;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class AdminController extends Controller
+{
+    public function dashboard(){
+        $stats=[
+            'total_users'    => User::count(),
+            'total_auctions' => Auction::count(),
+            'active'         => Auction::where('status', 'active')->count(),
+            'closed'         => Auction::where('status', 'closed')->count(),
+            'total_bids'     => Bid::count(),
+            'total_revenue'  => Auction::where('status', 'closed')->sum('current_bid'),
+            'sellers'        => User::where('role', 'seller')->count(),
+            'bidders'        => User::where('role', 'bidder')->count(),
+        ];
+
+        $recent_auctions=Auction::with('seller')
+            ->withCount('bids')->latest()
+            ->take(5)->get();
+        $recent_users=User::latest()->take(5)->get();
+        $recent_bids=Bid::with(['bidder', 'auction'])
+            ->latest()->take(5)->get();
+
+        return view('pages.admin.dashboard',compact('stats','recent_auctions','recent_users','recent_bids'));
+    }
+
+    // auctions management
+    public function auctions(Request $request){
+         $query=Auction::with('seller')->withCount('bids');
+        if($request->filled('search')){
+            $query->where('title','like','%' . $request->search . '%');
+        }
+        if($request->filled('status')){
+            $query->where('status',$request->status);
+        }
+        $auctions = $query->latest()->paginate(15);
+        return view('pages.admin.auctions',compact('auctions'));    
+    }
+
+   public function approveAuction($id){
+        $auction=Auction::findOrFail($id);
+        $status=$auction->starts_at->isFuture() ? 'draft' : 'active';
+
+        $auction->update(['status' => $status]);
+        $msg=$status === 'active'
+            ? 'Auction approved and set to active.'
+            : 'Auction approved — will go live automatically at its scheduled start time.';
+
+        return back()->with('success', $msg);
+    }
+
+    public function closeAuction($id){
+        $auction=Auction::withCount('bids')->findOrFail($id);
+        $highestBid=Bid::where('auction_id', $auction->id)
+            ->orderByDesc('amount')->first();
+ 
+        $auction->update([
+            'status'    => 'closed',
+            'winner_id' => $highestBid ? $highestBid->bidder_id : null,
+        ]);
+ 
+        return back()->with('success', 'Auction closed.');
+    }
+
+    public function destroyAuction($id){
+        $auction=Auction::withCount('bids')->findOrFail($id);
+        if($auction->bids_count > 0){
+            return back()->with('error', 'Cannot delete an auction that has bids.');
+        }
+        $auction->delete();
+        return redirect()->route('admin.auctions.index')
+            ->with('success', 'Auction deleted.');
+    }
+
+    //user management
+    public function users(Request $request){
+        $query=User::withCount(['bids', 'auctions']);
+        if($request->filled('search')){
+            $query->where('name','like','%' . $request->search . '%')
+                  ->orWhere('email','like','%' . $request->search . '%');
+        }
+        if($request->filled('role')){
+            $query->where('role', $request->role);
+        }
+        $users=$query->latest()->paginate(15);
+        return view('pages.admin.users', compact('users'));
+    }
+
+    public function showUser($id){
+        $user=User::with(['bids.auction','auctions'])
+            ->withCount(['bids','auctions'])
+            ->findOrFail($id);
+        return view('pages.admin.user-detail', compact('user'));
+    }
+
+    public function updateRole(Request $request, $id){
+        $request->validate([
+            'role' => 'required|in:bidder,seller,admin',
+        ]);
+        $user = User::findOrFail($id);
+
+        //prevent admin from changing their own role
+        if($user->id === auth()->id()){
+            return back()->with('error','You cannot change your own role');
+        }
+        $user->update(['role' => $request->role]);
+        return back()->with('success',"User role updated to {$request->role}.");
+    }
+
+    public function banUser($id){
+        $user=User::findOrFail($id);
+        if($user->id === auth()->id()){
+            return back()->with('error','You cannot ban yourself');
+        }
+        $newStatus=!$user->is_banned;
+        $user->update([
+            'is_banned' => $newStatus
+        ]);
+        return back()->with('success', $newStatus ? 'User banned' : 'User ban lifted');
+    }
+
+    public function destroyUser($id){
+         $user=User::withCount(['auctions', 'bids'])->findOrFail($id);
+
+        if($user->id === auth()->id()){
+            return back()->with('error','You cannot delete your own account.');
+        }
+        if($user->auctions_count > 0){
+            return back()->with('error',
+                'This user has '.$user->auctions_count.' auction(s) on record. '.
+                'Deleting them will permanently remove those auctions and their bid history. '.
+                'Ban the user instead, or delete their auctions individually first.');
+            }
+
+        $user->delete();
+        return redirect()->route('admin.users.index')
+            ->with('success','User deleted.');
+    }
+
+    // bid management
+     public function bids(Request $request){
+        $query=Bid::with(['bidder', 'auction']);
+        if($request->filled('search')){
+            $query->whereHas('bidder',function ($q) use ($request){
+                $q->where('name','like', '%' . $request->search . '%');
+            })->orWhereHas('auction',function ($q) use ($request){
+                $q->where('title','like', '%' . $request->search . '%');
+            });
+        }
+        $bids=$query->latest()->paginate(20);
+        return view('pages.admin.bids',compact('bids'));
+    }
+
+    public function destroyBid($id){
+        $bid=Bid::with('auction')->findOrFail($id);
+        $auction=$bid->auction;
+        $deletedBidderId=$bid->bidder_id;
+ 
+        $bid->delete();
+        AutoBid::where('auction_id', $auction->id)
+            ->where('bidder_id', $deletedBidderId)
+            ->delete();
+ 
+        $newHighest = Bid::where('auction_id', $auction->id)
+            ->orderByDesc('amount')
+            ->first();
+ 
+        $auction->update([
+            'current_bid' => $newHighest ? $newHighest->amount : $auction->starting_bid,
+            'winner_id' => $newHighest ? $newHighest->bidder_id : null,
+        ]);
+        return back()->with('success','Bid removed and auction price recalculated.');
+    }
+
+    public function reports(){
+        $topSellers=User::where('role','seller')
+            ->withCount('auctions')
+            ->withSum(['auctions as total_revenue' => function($q){
+            $q->where('status', 'closed');}], 'current_bid')
+            ->orderByDesc('total_revenue')
+            ->take(10)->get();
+        $topBidders=User::where('role','bidder')
+            ->withCount('bids')
+            ->orderByDesc('bids_count')
+            ->take(10)->get();
+        $categoryStats = Auction::selectRaw('category, COUNT(*) as total, AVG(current_bid) as avg_bid')
+            ->groupBy('category')->get();
+
+        return view('pages.admin.reports',compact('topSellers','topBidders','categoryStats'));
+    }
+}

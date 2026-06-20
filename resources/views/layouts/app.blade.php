@@ -97,13 +97,18 @@
                 </li>
                 <li>
                   <a class="dropdown-item"  href="{{ route('my-bids') }}">
-                    <i class="bi bi-hammer me-2"></i>My Bids
+                    <i class="bi bi-coin me-2"></i>My Bids
                   </a>
                 </li>
                 @if(auth()->user()->role === 'admin')
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                  <a class="dropdown-item">
+                  <a class="dropdown-item" href="{{ route('admin.reports') }}">
+                    <i class="bi bi-bar-chart me-2"></i>Reports
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
                     <i class="bi bi-shield-check me-2"></i>Admin Panel
                   </a>
                 </li>

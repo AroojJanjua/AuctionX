@@ -199,9 +199,9 @@
           @endforeach
         </div>
               {{-- Pagination --}}
-              <div class="mt-4 d-flex justify-content-center">
-          {{ $auctions->links('vendor.pagination.bootstrap-5') }}
-        </div>
+              <div class="p-3 d-flex justify-content-center">
+      {{ $auctions->withQueryString()->links('vendor.pagination.bootstrap-5') }}
+    </div>
       @endif
       </div>
     </div>

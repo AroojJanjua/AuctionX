@@ -67,6 +67,10 @@
         </tbody>
     </table>
   </div>
+  </div>
+    <div class="mt-4 d-flex justify-content-center">
+      {{ $bids->links('vendor.pagination.bootstrap-5') }}
+    </div>
   @endif   
 </div>
 @endsection

@@ -109,7 +109,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="section-title">Featured Auctions</div>
         <a href="{{ route('auctions.index') }}" class="see-all-btn">
-          View all <i class="bi bi-arrow-right"></i></a>
+          View all</a>
       </div>
 
     {{-- Category Filters --}}

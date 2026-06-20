@@ -130,7 +130,7 @@ class BidController extends Controller
     // Find competitor from auto_bids table — clean and accurate
     $competitor = AutoBid::where('auction_id', $auction->id)
         ->where('bidder_id', '!=', $justBiddedBy)
-        ->where('max_amount', '>=', $currentBid)
+        ->where('max_amount', '>', $currentBid)
         ->orderByDesc('max_amount')
         ->orderBy('created_at')     //older limit wins
         ->first();
@@ -139,6 +139,8 @@ class BidController extends Controller
 
     $increment=max(10,(int)($currentBid * 0.01));
     $counterBid=min((int)round($currentBid + $increment),(int)$competitor->max_amount);
+
+     if($counterBid <= $currentBid) return;
 
     Bid::create([
         'auction_id'  => $auction->id,

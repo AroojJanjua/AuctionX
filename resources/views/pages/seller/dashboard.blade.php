@@ -127,9 +127,9 @@
             </tbody>
           </table>
         </div>
-        {{-- <div class="p-3 d-flex justify-content-center">
+        <div class="p-3 d-flex justify-content-center">
           {{ $listings->links('vendor.pagination.bootstrap-5') }}
-        </div> --}}
+        </div>
       @endif
     </div>
 

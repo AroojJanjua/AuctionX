@@ -134,7 +134,9 @@ class Auction extends Model
             default          => 0,
         };
 
-        $suggested =round($this->current_bid + ($avgIncrement * $multiplier) + $bonus);
+        $suggested=round($this->current_bid + ($avgIncrement * $multiplier) + $bonus);
+        $suggested=max($suggested, $this->min_next_bid);
+
         $confidence=match(true){
             count($bids) >= 10 => 'High',
             count($bids) >= 5  => 'Medium',
