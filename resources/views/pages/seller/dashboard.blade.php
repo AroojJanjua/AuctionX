@@ -68,7 +68,7 @@
             </thead>
             <tbody>
               @foreach($listings as $listing)
-              <tr style="border-bottom:1px solid var(--border)">
+              <tr style="border-bottom:1px solid var(--border)" data-listing-id="{{ $listing->id }}">
                 <td style="padding:12px 16px;vertical-align:middle">
                   <div style="font-weight:700;color:var(--text)">{{ Str::limit($listing->title, 35) }}</div>
                   <div style="font-size:0.75rem;color:var(--muted)">{{ ucfirst($listing->category) }}</div>
@@ -86,7 +86,7 @@
                   {{ $listing->ends_at->format('M d, Y') }}<br>
                   {{ $listing->ends_at->format('h:i A') }}
                 </td>
-                <td style="padding:12px 16px;vertical-align:middle">
+                <td style="padding:12px 16px;vertical-align:middle" data-status-cell>
                   @php
                     $displayStatus = $listing->status;
                     if($listing->status === 'active' && $listing->ends_at->isPast()){
@@ -100,6 +100,8 @@
                       <span class="badge rounded-pill badge-closed">Closed</span> @break
                     @case('draft')
                       <span class="badge rounded-pill badge-drafted">Draft</span> @break
+                    @case('scheduled')
+                      <span class="badge rounded-pill badge-drafted">Scheduled</span> @break
                   @endswitch
                 </td>
                 <td style="padding:12px 16px;vertical-align:middle">
@@ -135,3 +137,69 @@
 
   </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(typeof AuctionXSocket === 'undefined') return;
+ 
+  var sellerId={{ auth()->id() }};
+ 
+  // Subscribe to this seller's private channel then pusher will POST to /broadcasting/auth to confirm this user owns this channel
+  var sellerChannel=AuctionXSocket.subscribe('private-seller.' + sellerId); 
+  sellerChannel.bind('auction.approved',function(data){
+ 
+    //Update the status badge in the listings table
+    var row=document.querySelector('tr[data-listing-id="' + data.auctionId + '"]');
+    if(!row) return;
+ 
+    var badgeCell=row.querySelector('td[data-status-cell]');
+    if(!badgeCell) return;
+ 
+    var badgeMap={
+      'active'   :{ cls: 'badge-timed',  label: 'Active'   },
+      'scheduled':{ cls: 'badge-drafted',label: 'Scheduled'},
+      'draft'    :{ cls: 'badge-drafted',label: 'Draft'    },
+      'closed'   :{ cls: 'badge-closed', label: 'Closed'   },
+    };
+    var badge=badgeMap[data.newStatus] || badgeMap['draft'];
+    badgeCell.innerHTML='<span class="badge rounded-pill ' + badge.cls + '">' + badge.label + '</span>';
+  });
+
+  // Admin deleted one of this seller's auctions, so it remove the row instantly
+  sellerChannel.bind('auction.deleted',function(data){
+    var row=document.querySelector('tr[data-listing-id="' + data.auctionId + '"]');
+    if(!row) return;
+    row.remove();
+  });
+
+  var feedCh=AuctionXSocket.subscribe('auctions.feed');
+  feedCh.bind('auction.status-changed',function(data){
+    var row=document.querySelector('tr[data-listing-id="' + data.auctionId + '"]');
+    if(!row) return;
+
+    var badgeCell=row.querySelector('td[data-status-cell]');
+    if(!badgeCell) return;
+
+    var badgeMap={
+      'active'   :{ cls: 'badge-timed',     label: 'Active'   },
+      'scheduled':{ cls: 'badge-drafted',   label: 'Scheduled'},
+      'closed'   :{ cls: 'badge-closed',    label: 'Closed'   },
+      'draft'    :{ cls: 'badge-drafted',   label: 'Draft'    },
+    };
+    var badge=badgeMap[data.status] || badgeMap['draft'];
+    badgeCell.innerHTML='<span class="badge rounded-pill ' + badge.cls + '">' + badge.label + '</span>';
+
+  });
+
+  // Also catch seller's own deletions coming back through the feed
+  // the private channel handles admin-deleted, feed handles self-deleted
+  feedCh.bind('auction.deleted',function(data){
+    var row=document.querySelector('tr[data-listing-id="' + data.auctionId + '"]');
+    if(row){
+    row.remove();
+    }
+  });
+});
+</script>
+@endpush

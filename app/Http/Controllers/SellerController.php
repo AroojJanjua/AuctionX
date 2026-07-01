@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Auction;
 use App\Models\Bid;
+use App\Events\AuctionSubmitted;
+use App\Events\AuctionDeleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -31,7 +33,7 @@ class SellerController extends Controller
 
     // Store a new auction
     public function store(Request $request){
-        $rules = [
+        $rules=[
         'title'        => 'required|string|max:255',
         'description'  => 'required|string|max:5000',
         'category'     => 'required|in:art,watches,vehicles,jewelry,collectibles,electronics,other',
@@ -51,7 +53,7 @@ class SellerController extends Controller
         ],
     ];
 
-    $validated = $request->validate($rules,[
+    $validated=$request->validate($rules,[
         'starts_at.required' => 'Please select a start date and time.',
         'starts_at.after'    => 'Auction must start at least 30 minutes from now.',
         'ends_at.required'   => 'Please select an end date and time.',
@@ -63,20 +65,21 @@ class SellerController extends Controller
     $start = \Carbon\Carbon::parse($validated['starts_at']);
     $end   = \Carbon\Carbon::parse($validated['ends_at']);
 
-    if ($end->isAfter($start) && $start->diffInMinutes($end) < 60){
+    if($end->isAfter($start) && $start->diffInMinutes($end) < 60){
             return back()->withInput()
                 ->withErrors(['ends_at' => 'Auction must run for at least 1 hour.']);
         }
-        if ($start->diffInDays($end) > 30){
+        if($start->diffInDays($end) > 30){
             return back()->withInput()
                 ->withErrors(['ends_at' => 'Auction cannot run for more than 30 days.']);
         }
  
         $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('auctions', 'public');
+        if($request->hasFile('image')){
+            $imagePath = $request->file('image')->store('auctions','public');
         }
-        Auction::create([
+
+        $auction=Auction::create([
             'seller_id'    => auth()->id(),
             'title'        => $validated['title'],
             'description'  => $validated['description'],
@@ -89,6 +92,10 @@ class SellerController extends Controller
             'image'        => $imagePath,
             'status'       => 'draft', // always draft bcoz needs admin approval
         ]);
+
+         // Notify admin in real time — they'll see the new row appear without refreshing
+        broadcast(new AuctionSubmitted($auction->load('seller')));
+
         return redirect()->route('seller.dashboard')
             ->with('success','Auction submitted for review. Admin will approve it shortly.');
     }
@@ -112,10 +119,10 @@ class SellerController extends Controller
 
         //Cannot edit if bids placed (protect bidders)
         if($listing->bids_count > 0){
-            return back()->with('error', 'You cannot edit an auction that already has bids.');
+            return back()->with('error','You cannot edit an auction that already has bids.');
         }
  
-        $validated = $request->validate([
+        $validated=$request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string|max:5000',
             'category'    => 'required|in:art,watches,vehicles,jewelry,collectibles,electronics,other',
@@ -134,14 +141,14 @@ class SellerController extends Controller
             'ends_at.different' => 'Start and end time cannot be the same.',
         ]);
 
-         $start = $listing->starts_at;
+        $start = $listing->starts_at;
         $end   = \Carbon\Carbon::parse($validated['ends_at']);
  
         if($end->isAfter($start) && $start->diffInMinutes($end) < 60){
             return back()->withInput()
                 ->withErrors(['ends_at' => 'Auction must run for at least 1 hour.']);
         }
-         if($start->diffInDays($end) > 30){
+        if($start->diffInDays($end) > 30){
             return back()->withInput()
                 ->withErrors(['ends_at' => 'Auction cannot run for more than 30 days']);
         }
@@ -169,11 +176,19 @@ class SellerController extends Controller
         if($listing->bids_count > 0){
             return back()->with('error','You cannot delete a listing that already has bids.');
         }
+
+        //capture before delete
+        $auctionId=$listing->id;
+        $sellerId=$listing->seller_id;
+        $title=$listing->title;
  
         if($listing->image){
             Storage::disk('public')->delete($listing->image);
         }
         $listing->delete();
+
+        //tell admin page and any public page to remove this auction
+        broadcast(new AuctionDeleted($auctionId,$sellerId,$title));
         return redirect()->route('seller.dashboard')->with('success','Listing deleted successfully.');
     }
 

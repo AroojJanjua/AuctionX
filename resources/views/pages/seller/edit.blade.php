@@ -194,9 +194,7 @@
  
         {{-- Submit --}}
         <div class="d-flex gap-3 flex-wrap align-items-center justify-content-center">
-          <button type="submit" class="btn btn-brown btn-lg px-5">
-            <i class="bi bi-check2 me-2"></i>Save Changes
-          </button>
+          <button type="submit" class="btn btn-brown btn-lg px-5">Save</button>
           <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost-ax btn-lg px-5">
             Cancel
           </a>

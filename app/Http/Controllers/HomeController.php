@@ -7,9 +7,6 @@ use Illuminate\Http\Request;
 class HomeController extends Controller
 {
     public function index(){
-        // Auto-close expired auctions & activate started ones
-        Auction::where('status','active')->where('ends_at','<=', now())->update(['status'=>'closed']);
-        Auction::where('status','draft')->where('starts_at','<=', now())->update(['status'=>'active']);
         $featured=Auction::with('seller')
             ->where('status','active')
             ->withCount('bids')
@@ -18,10 +15,45 @@ class HomeController extends Controller
         $auctions=Auction::with('seller')
             ->where('status','active')
             ->withCount('bids')
+            ->when($featured,function($q) use ($featured){
+            $q->where('id','!=',$featured->id);
+        })
             ->orderBy('ends_at')
             ->take(8)
             ->get();
         return view('pages.home',compact('featured', 'auctions'));
+    }
+
+    public function homeLiveData(){
+        $auctions=Auction::with('seller')
+            ->where('status','active')
+            ->withCount('bids')
+            ->orderBy('ends_at')         
+            ->take(8)->get()
+            ->map(fn($a) => [
+                'id'           => $a->id,
+                'currentBid'   => (int) $a->current_bid,
+                'bidsCount'    => (int) $a->bids_count,
+                'timeRemaining'=> $a->time_remaining,
+                'endsSoon'     => (bool) $a->ends_soon,
+                'endsAt'       => $a->ends_at->timestamp,
+                'status'       => $a->status,
+            ]);
+ 
+        $featured=Auction::where('status','active')
+            ->withCount('bids')
+            ->orderByDesc('bids_count')
+            ->first();
+ 
+        return response()->json([
+            'auctions'   => $auctions,
+            'featured'   => $featured ? [
+            'id'         => $featured->id,
+            'currentBid' => (int) $featured->current_bid,
+            'endsAt'     => $featured->ends_at->timestamp,
+            'endsSoon'   => (bool) $featured->ends_soon,
+            ] : null,
+        ]);
     }
 
     public function howItWorks(){

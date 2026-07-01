@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -11,9 +12,11 @@ use App\Http\Controllers\BidController;
 use App\Http\Controllers\AdminController;
 
 
-//    1. PUBLIC ROUTES(guests + loggin users)
+Broadcast::routes(['middleware' => ['auth']]);
+
 // Home
 Route::get('/',               [HomeController::class, 'index'])->name('home');
+Route::get('/home/live-data', [HomeController::class, 'homeLiveData'])->name('home.live-data');
 // Static pages  
 Route::get('/how-it-works',   [HomeController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/about',          [HomeController::class, 'about'])->name('about');
@@ -23,11 +26,11 @@ Route::get('/terms',          [HomeController::class, 'terms'])->name('terms');
 Route::get('/support',        [HomeController::class, 'support'])->name('support');
 
 
-Route::prefix('auctions')->name('auctions.')->group(function (){
-    Route::get('/',           [AuctionController::class, 'index'])->name('index');  
-    Route::get('/{id}',       [AuctionController::class, 'show'])->name('show');   
+Route::prefix('auctions')->name('auctions.')->group(function(){
+    Route::get('/',                 [AuctionController::class, 'index'])->name('index');  
+    Route::get('/{id}',             [AuctionController::class, 'show'])->name('show');   
+    Route::get('/{id}/live-data',   [AuctionController::class, 'liveData'])->name('live-data');
 });
-
 
 Route::middleware('guest')->group(function(){
     // Login
@@ -38,7 +41,6 @@ Route::middleware('guest')->group(function(){
     Route::post('/register',  [RegisterController::class, 'register']);
 
 });
-
 
 Route::middleware('auth')->group(function(){
     // Logout 
@@ -53,11 +55,9 @@ Route::middleware('auth')->group(function(){
 
 });
 
-
 Route::middleware(['auth', 'role:bidder,seller,admin'])->group(function(){
     Route::post('/auctions/{auction}/bid',[BidController::class, 'store'])->name('auctions.bid');
 });
-
 
 Route::middleware(['auth','role:seller,admin'])->prefix('seller')->name('seller.')
     ->group(function (){

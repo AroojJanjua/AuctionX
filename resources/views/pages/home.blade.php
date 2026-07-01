@@ -18,11 +18,9 @@
           </p>
           <div class="d-flex flex-wrap gap-2 mt-4">
             <a href="{{ route('auctions.index') }}" 
-             class="btn btn-brown px-4 py-2">View Items
-            </a>
+             class="btn btn-brown px-4 py-2">View Items</a>
             <a href="{{ route('register') }}"
-             class="btn btn-brown-outline px-4 py-2">Start Selling
-            </a>
+             class="btn btn-brown-outline px-4 py-2">Start Selling</a>
           </div>
         </div>
 
@@ -67,7 +65,7 @@
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                   <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Current Bid</div>
-                  <span class="auction-price">PKR {{ number_format($featured->current_bid) }}</span>
+                  <span class="auction-price" id="feat-price">PKR {{ number_format($featured->current_bid) }}</span>
                 </div>
                 <div class="text-end">
                   <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px">Ends in</div>
@@ -132,7 +130,7 @@
       @else
       <div class="row g-3" id="auctionGrid">
           @foreach($auctions as $auction)
-          <div class="col-sm-6 col-lg-3 auction-item" data-category="{{ $auction->category }}">
+          <div class="col-sm-6 col-lg-3 auction-item" data-auction-id="{{ $auction->id }}" data-category="{{ $auction->category }}">
             <div class="auction-card h-100">
             {{-- card image --}}
               <div class="auction-card-img {{ $auction->category }}">
@@ -179,10 +177,10 @@
                     <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">
                       Current Bid
                     </div>
-                    <span class="auction-price">PKR {{ number_format($auction->current_bid) }}</span>
+                    <span class="auction-price" id="home-price-{{ $auction->id }}">PKR {{ number_format($auction->current_bid) }}</span>
                   </div>
                   <div class="text-end">
-                    <div style="font-size:.7rem;color:var(--muted)">
+                    <div style="font-size:.7rem;color:var(--muted)" id="home-bids-{{ $auction->id }}">
                       {{ $auction->bids_count }} {{ Str::plural('bid', $auction->bids_count) }}
                     </div>
                     <span class="auction-timer {{ $auction->ends_soon ? 'ending' : '' }}">
@@ -279,7 +277,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   const filterBtns=document.querySelectorAll('#filterBar .filter-btn');
   const items=document.querySelectorAll('#auctionGrid .auction-item');
-  const noResults =document.getElementById('noResults');
+  const noResults=document.getElementById('noResults');
 
   filterBtns.forEach(btn=>{
     btn.addEventListener('click', function(){
@@ -301,6 +299,136 @@ document.addEventListener('DOMContentLoaded',function(){
       }
     });
   });
+
+  //Pusher for real-time updates
+  if(typeof AuctionXSocket === 'undefined') return;
+
+  //Track the current featured auction id and its bid count
+  var featuredId={{ $featured ? $featured->id : 'null' }};
+  var featuredBids={{ $featured ? $featured->bids_count : 0 }};
+
+  // Subscribe to every grid card's channel
+  document.querySelectorAll('#auctionGrid .auction-item').forEach(function(col){
+    var id=col.dataset.auctionId;
+    var ch=AuctionXSocket.subscribe('auction.' + id);
+
+    ch.bind('bid.placed',function(data){
+      var auctionId=parseInt(id,10);
+      var newBids=data.bidsCount;
+      var newPrice=data.currentBid;
+
+      //Update grid card price
+      var priceEl=document.getElementById('home-price-' + id);
+      if(priceEl){
+        priceEl.textContent='PKR ' + Number(newPrice).toLocaleString();
+        priceEl.style.transition='color .2s';
+        priceEl.style.color='var(--br)';
+        setTimeout(function(){ priceEl.style.color = ''; }, 800);
+      }
+
+      //Update grid card bid count
+      var bidsEl=document.getElementById('home-bids-' + id);
+      if(bidsEl){
+        bidsEl.textContent=newBids + ' ' + (newBids === 1 ? 'bid' : 'bids');
+        bidsEl.dataset.bidsCount=newBids;
+      }
+      //Also keep the col data attribute in sync for swap logic
+      col.dataset.bidsCount=newBids;
+
+      //Check if a different card now has more bids then swap
+      if(newBids > featuredBids){
+        fetch('{{ route("home.live-data") }}')
+          .then(function(res){ return res.json(); })
+          .then(function(d){
+            if(!d.featured) return;
+            // Only swap if server agree that this id is now the top bidded
+            if(d.featured.id === auctionId){
+              featuredId=d.featured.id;
+              featuredBids=d.featured.bidsCount || newBids;
+              location.reload();
+            }
+          })
+          .catch(function(err){
+                console.error('Failed to check featured auction:', err);
+          });
+      }
+       });
+      //when an auction closes, grey out its card instantly
+      ch.bind('auction.status-changed',function(data){
+      if(data.status !== 'closed') return;
+
+      // If this was the featured card then reload so the next best takes over
+      if(parseInt(id,10) === featuredId){
+        location.reload();
+        return;
+      }
+
+      // Otherwise just dim the grid card in place
+      var card=col.querySelector('.auction-card');
+      if(card){
+        card.style.opacity='0.5';
+        card.style.pointerEvents='none';
+      }
+      var timerEl=col.querySelector('.auction-timer');
+      if(timerEl){
+        timerEl.textContent='Ended';
+        timerEl.classList.remove('ending');
+        timerEl.style.color='var(--muted)';
+      }
+      var badges=col.querySelector('.auction-card-badges');
+      if(badges){
+        var ended=document.createElement('span');
+        ended.className='badge rounded-pill badge-closed';
+        ended.textContent='Ended';
+        badges.innerHTML='';
+        badges.appendChild(ended);
+      }
+    });
+  });
+
+  if(featuredId){
+    var featCh=AuctionXSocket.subscribe('auction.' + featuredId);
+    featCh.bind('bid.placed', function(data){
+      var featPrice=document.getElementById('feat-price');
+      if(featPrice){
+        featPrice.textContent='PKR ' + Number(data.currentBid).toLocaleString();
+        featPrice.style.transition='color .2s';
+        featPrice.style.color='var(--br)';
+        setTimeout(function(){ featPrice.style.color = ''; }, 800);
+      }
+      featuredBids=data.bidsCount;
+    });
+
+    
+    // Featured card closed then reload 
+    featCh.bind('auction.status-changed',function(data){
+      if(data.status === 'closed') 
+        location.reload();
+      });
+  }
+
+  var feedCh=AuctionXSocket.subscribe('auctions.feed');
+  feedCh.bind('auction.deleted',function(data){
+    var col=document.querySelector('#auctionGrid [data-auction-id="' + data.auctionId + '"]');
+    if(col){
+        col.remove(); 
+      }
+
+    // If the deleted auction was the featured card then reload
+    if(parseInt(data.auctionId) === featuredId){
+      location.reload();
+    }
+  });
+
+  // scheduled auction to appears it live in the grid
+  feedCh.bind('auction.status-changed',function(data){
+    if(data.status !== 'active') return;
+    var alreadyOnPage=document.querySelector('#auctionGrid [data-auction-id="' + data.auctionId + '"]');
+    if(!alreadyOnPage){
+      location.reload();
+    }
+  });
+  
 });
 </script>
 @endpush

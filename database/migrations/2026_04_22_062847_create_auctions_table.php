@@ -42,7 +42,7 @@ return new class extends Migration
 
             $table->unsignedTinyInteger('snipe_extension_count')->default(0);
 
-            $table->enum('status', ['draft','active','closed','cancelled'])->default('draft');
+            $table->enum('status', ['draft','scheduled','active','closed','cancelled'])->default('draft');
 
             $table->timestamps();
         });

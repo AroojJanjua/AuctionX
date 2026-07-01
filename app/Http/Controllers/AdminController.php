@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\User;
+use App\Models\AutoBid;
+use App\Events\AuctionApproved;
+use App\Events\AuctionStatusChanged;
+use App\Events\AuctionDeleted;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -45,38 +50,54 @@ class AdminController extends Controller
     }
 
    public function approveAuction($id){
-        $auction=Auction::findOrFail($id);
-        $status=$auction->starts_at->isFuture() ? 'draft' : 'active';
-
+        $auction=Auction::with('seller')->findOrFail($id);
+        $status=$auction->starts_at->isFuture()?'scheduled':'active';
         $auction->update(['status' => $status]);
+ 
+        // Tell the seller their auction was approved and update status badge
+        broadcast(new AuctionApproved($auction));
+
         $msg=$status === 'active'
             ? 'Auction approved and set to active.'
             : 'Auction approved — will go live automatically at its scheduled start time.';
-
+ 
         return back()->with('success', $msg);
     }
 
     public function closeAuction($id){
-        $auction=Auction::withCount('bids')->findOrFail($id);
-        $highestBid=Bid::where('auction_id', $auction->id)
-            ->orderByDesc('amount')->first();
+        $auction=Auction::with('winner')->withCount('bids')->findOrFail($id);
+        $highestBid=Bid::where('auction_id', $auction->id)->orderByDesc('amount')->first();
  
         $auction->update([
             'status'    => 'closed',
             'winner_id' => $highestBid ? $highestBid->bidder_id : null,
         ]);
  
+        // Reload so winner relationship is fresh after the update
+        $auction->load('winner');
+        broadcast(new AuctionStatusChanged($auction));
         return back()->with('success', 'Auction closed.');
     }
 
     public function destroyAuction($id){
         $auction=Auction::withCount('bids')->findOrFail($id);
         if($auction->bids_count > 0){
-            return back()->with('error', 'Cannot delete an auction that has bids.');
+            return back()->with('error','Cannot delete an auction that has bids.');
         }
+
+        if($auction->image){
+          Storage::disk('public')->delete($auction->image);
+        }
+
+        //we capture before delete so we can broadcast after
+        $auctionId=$auction->id;
+        $sellerId=$auction->seller_id;
+        $title=$auction->title;
+ 
         $auction->delete();
-        return redirect()->route('admin.auctions.index')
-            ->with('success', 'Auction deleted.');
+ 
+        broadcast(new AuctionDeleted($auctionId, $sellerId, $title));
+        return redirect()->route('admin.auctions.index')->with('success', 'Auction deleted.');
     }
 
     //user management
@@ -138,6 +159,12 @@ class AdminController extends Controller
                 'Deleting them will permanently remove those auctions and their bid history. '.
                 'Ban the user instead, or delete their auctions individually first.');
             }
+        
+        $user->auctions->each(function($auction){
+        if($auction->image){
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($auction->image);
+           }
+        });
 
         $user->delete();
         return redirect()->route('admin.users.index')
@@ -190,7 +217,7 @@ class AdminController extends Controller
             ->withCount('bids')
             ->orderByDesc('bids_count')
             ->take(10)->get();
-        $categoryStats = Auction::selectRaw('category, COUNT(*) as total, AVG(current_bid) as avg_bid')
+        $categoryStats=Auction::selectRaw('category, COUNT(*) as total, AVG(current_bid) as avg_bid')
             ->groupBy('category')->get();
 
         return view('pages.admin.reports',compact('topSellers','topBidders','categoryStats'));

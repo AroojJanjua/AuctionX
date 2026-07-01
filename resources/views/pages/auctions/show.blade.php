@@ -132,7 +132,7 @@
                   <td style="padding:7px 8px;font-weight:{{ $i===0?'700':'400' }};color:var(--text)">
                     {{ $bid->bidder->name }}
                     @if($i===0)
-                    <span style="background:var(--green);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:10px;margin-left:4px">Leading</span>
+                    <span data-leading-badge style="background:var(--green);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:10px;margin-left:4px">Leading</span>
                     @endif</td>
                   <td style="padding:7px 8px">
                     @if($bid->is_auto_bid)
@@ -217,28 +217,30 @@
         Smart Bid Suggestion</div>
 
             <div style="display:flex; align-items:center; justify-content:space-between; width:100%">
-              <div style="font-size:.72rem; color:var(--muted)">
+              <div style="font-size:.72rem; color:var(--muted)" id="suggestion-bids-analyzed">
                     Based on {{ $suggestion['bids_analyzed'] }} {{ Str::plural('bid',$suggestion['bids_analyzed']) }}
               </div>
               <div style="font-size:.72rem; color:var(--muted)">Confidence: 
-                  <span style="font-weight:700; color:{{ $suggestion['confidence']==='High' ? 'var(--green)' : ($suggestion['confidence']==='Medium' ? '#B45309' : 'var(--muted)') }}"> 
+                  <span id="suggestion-confidence" style="font-weight:700; color:{{ $suggestion['confidence']==='High' ? 'var(--green)' : ($suggestion['confidence']==='Medium' ? '#B45309' : 'var(--muted)') }}"> 
                   {{ $suggestion['confidence'] }}</span>
               </div>
             </div>
         </div>
+        <div id="suggestion-card-body">
             @if($suggestion['bids_analyzed'] > 0)
 
                {{-- Suggested amount --}}
-              <div style="background:#fff;border:1px solid var(--br-soft);border-radius:10px;
+              <div id="suggestion-amount-card" style="background:#fff;border:1px solid var(--br-soft);border-radius:10px;
               padding:.8rem;margin-bottom:.7rem">
                 <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;
                 margin-bottom:3px">Suggested Winning Bid</div>
-                <div style="font-size:1.6rem;font-weight:800;color:var(--br)">PKR {{ number_format($suggestion['amount']) }}</div>
+                <div id="suggestion-amount" style="font-size:1.6rem;font-weight:800;color:var(--br)">PKR {{ number_format($suggestion['amount']) }}</div>
               </div>
 
               {{-- Bid button --}}
               <div style="display: flex; justify-content: center; width: 100%; margin-top: 10px;">
               <button type="button" id="use-suggestion-btn"
+                      data-amount="{{ $suggestion['amount'] }}"
                       onclick="fillSuggestedBid({{ $suggestion['amount'] }})"
                       style="width:50%;background:var(--br);color:#fff;border:none;border-radius:9px;
                       padding:.6rem;font-size:.85rem;font-weight:700;cursor:pointer;"> Select
@@ -250,6 +252,7 @@
                 Suggestion will appear after the first bid is placed
               </div>             
             @endif    
+        </div>
         </div>
         @endif
 
@@ -275,7 +278,7 @@
                      <div style="display:flex; align-items:center; justify-content:space-between; width:100%">
                       
                       <div><label class="form-label-ax"> Your Bid</label></div>
-                      <span style="font-size:.75rem;color:var(--muted);font-weight:400; margin-bottom:2px">
+                      <span id="min-next-bid-label" style="font-size:.75rem;color:var(--muted);font-weight:400; margin-bottom:2px">
                          minimum PKR {{ number_format($auction->min_next_bid) }}
                       </span>
                     </div>
@@ -290,6 +293,7 @@
                              style="padding-left:40px"
                              placeholder="{{ number_format( (int) $auction->min_next_bid) }}"
                              min="{{ (int) $auction->min_next_bid }}"
+                             data-min="{{ (int) $auction->min_next_bid }}"
                              step="1"
                              value="{{ old('bid_amount') }}"
                              required/>
@@ -327,6 +331,7 @@
                                style="padding-left:40px"
                                placeholder="enter maximum limit"
                                min="{{ (int) $auction->min_next_bid }}"
+                               data-min="{{ (int) $auction->min_next_bid }}"
                                step="1"
                                value="{{ old('max_auto_bid') }}"
                                disabled/>
@@ -386,27 +391,33 @@
   </div>
 </div>
 @endsection
-
 @push('scripts')
 <script>
 
+let auctionEndsAt={{ $auction->ends_at->timestamp }} * 1000;
+const auctionStartsAt={{ $auction->starts_at->timestamp }} * 1000;
+let auctionClosed=false;
+
 document.addEventListener('DOMContentLoaded',function(){
-  const startsAt={{ $auction->starts_at->timestamp }} * 1000;
-  const endsAt={{ $auction->ends_at->timestamp }}   * 1000;
- 
   function tick(){
+    if(auctionClosed){
+        document.getElementById('show-h').textContent='00';
+        document.getElementById('show-m').textContent='00';
+        document.getElementById('show-s').textContent='00';
+        return;
+    }
     const now=Date.now();
-    const notStarted=now < startsAt;
-    const target=notStarted ? startsAt : endsAt;
+    const notStarted=now < auctionStartsAt;
+    const target=notStarted ? auctionStartsAt : auctionEndsAt;
     const diff=Math.max(0, Math.floor((target - now) / 1000));
     const h=Math.floor(diff / 3600);
     const m=Math.floor((diff % 3600) / 60);
     const s=diff % 60;
- 
+
     document.getElementById('show-h').textContent=String(h).padStart(2,'0');
     document.getElementById('show-m').textContent=String(m).padStart(2,'0');
     document.getElementById('show-s').textContent=String(s).padStart(2,'0');
- 
+
     if(diff <= 0){
       setTimeout(() => location.reload(),1000);
       return;
@@ -414,10 +425,193 @@ document.addEventListener('DOMContentLoaded',function(){
        setTimeout(tick,1000);
       }
       tick();       
+
+  //Live bid updates via Pusher
+  if(typeof AuctionXSocket === 'undefined') return;
+
+  const auctionId={{ $auction->id }};
+  const channel=AuctionXSocket.subscribe('auction.' + auctionId);
+
+  channel.bind('bid.placed',function(pushData){
+    refreshAuctionState();
+
+    if(pushData.sniped){
+      const banner=document.createElement('div');
+      banner.className='alert alert-warning mt-2';
+      banner.textContent='Anti-sniping protection activated — auction timer extended by 2 minutes!';
+      const col=document.querySelector('.col-lg-7');
+      if(col) 
+        col.prepend(banner);
+      setTimeout(function(){ banner.remove(); }, 6000);
+    }
+  });
+
+  // Live auction close
+   channel.bind('auction.status-changed',function(data){
+    if(data.status === 'closed'){
+
+    // Stop the countdown
+    auctionClosed=true;
+
+      // Hide the bid form and smart suggestion card
+      const bidForm=document.getElementById('bidForm');
+      const suggCard=document.getElementById('suggestion-card-body');
+      if(bidForm)   
+        bidForm.closest('div[style]').style.display='none';
+      if(suggCard)  
+        suggCard.closest('div[style]').style.display='none';
+
+      // Replace the right-hand action column with an "Auction Ended" panel
+      const actionCol=document.querySelector('.col-lg-5');
+      if(actionCol){
+        const winnerLine=data.winnerName 
+          ? 'Won by <strong>' + data.winnerName + '</strong>'
+          : 'No winner declared';
+
+        const panel=document.createElement('div');
+        panel.style.cssText='background:var(--br-pale);border:1px solid var(--br-soft);border-radius:14px;padding:1.3rem;text-align:center;margin-bottom:1rem';
+        panel.innerHTML=
+          '<i class="bi bi-trophy" style="font-size:2rem;color:var(--br);display:block;margin-bottom:.5rem"></i>' +
+          '<div style="font-weight:800;font-size:.95rem;color:var(--br);margin-bottom:.3rem">Auction Ended</div>' +
+          '<div style="font-size:.83rem;color:var(--muted)">' + winnerLine + '</div>';
+
+        // insert panel at top
+        actionCol.prepend(panel);
+      }
+    }
+
+    if(data.status === 'active'){
+      location.reload();
+    }
+  });
+ 
+  function refreshAuctionState(){
+    fetch('/auctions/' + auctionId + '/live-data')
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+
+        //Current bid price
+        const priceEl=document.getElementById('current-bid');
+        if(priceEl){
+          priceEl.textContent='PKR ' + Number(data.currentBid).toLocaleString();
+          priceEl.style.transition='color .2s';
+          priceEl.style.color='var(--br)';
+          setTimeout(function(){ priceEl.style.color = ''; },800);
+        }
+
+        //Sync countdown target in case anti-snipe extended ends_at
+        const newEndsAt=new Date(data.endsAt).getTime();
+        if(newEndsAt !== auctionEndsAt){
+          auctionEndsAt=newEndsAt;
+        }
+
+        //Rebuild the ENTIRE bid history table from real server data
+        const tbody=document.getElementById('bid-history-body');
+        if(tbody && Array.isArray(data.bids)){
+          tbody.innerHTML=data.bids.map(function(bid,i){
+            const isLeading = i === 0;
+            return '<tr style="border-bottom:1px solid var(--border);' + (isLeading ? 'background:var(--br-pale)' : '') + '">' +
+              '<td style="padding:7px 8px;color:var(--muted)">' + (i + 1) + '</td>' +
+              '<td style="padding:7px 8px;font-weight:' + (isLeading ? '700' : '400') + ';color:var(--text)">' +
+                bid.bidderName +
+                (isLeading ? ' <span style="background:var(--green);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:10px;margin-left:4px">Leading</span>' : '') +
+              '</td>' +
+              '<td style="padding:7px 8px">' +
+                (bid.isAutoBid
+                  ? '<span style="background:#EEEDFE;color:#534AB7;font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:600">Auto</span>'
+                  : '<span style="background:var(--br-pale);color:var(--br);font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:600">Manual</span>'
+                ) +
+              '</td>' +
+              '<td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--br)">PKR ' + Number(bid.amount).toLocaleString() + '</td>' +
+              '<td style="padding:7px 8px;text-align:right;color:var(--muted)">' + bid.timeAgo + '</td>' +
+            '</tr>';
+          }).join('');
+        }
+
+        //Minimum next bid, update label + form input constraints
+        const minLabel=document.getElementById('min-next-bid-label');
+        if(minLabel) 
+          minLabel.textContent='minimum PKR ' + Number(data.minNextBid).toLocaleString();
+
+        const bidInput=document.getElementById('bid_amount');
+        if(bidInput){
+          bidInput.min=data.minNextBid;
+          bidInput.dataset.min=data.minNextBid;
+          bidInput.placeholder=Number(data.minNextBid).toLocaleString();
+        }
+
+        const maxAutoInput=document.getElementById('max_auto_bid');
+        if(maxAutoInput){
+          maxAutoInput.min=data.minNextBid;
+          maxAutoInput.dataset.min=data.minNextBid;
+        }
+
+        //Smart bid suggestion card
+        if(data.suggestion){
+          const analyzedEl=document.getElementById('suggestion-bids-analyzed');
+          if(analyzedEl){
+            analyzedEl.textContent='Based on ' + data.suggestion.bids_analyzed +
+              (data.suggestion.bids_analyzed === 1 ? ' bid' : ' bids');
+          }
+
+          const confEl=document.getElementById('suggestion-confidence');
+          if(confEl){
+            confEl.textContent=data.suggestion.confidence;
+            confEl.style.color=data.suggestion.confidence === 'High' ? 'var(--green)'
+              : (data.suggestion.confidence === 'Medium' ? '#B45309' : 'var(--muted)');
+          }
+
+          // Body amount card
+          const bodyEl=document.getElementById('suggestion-card-body');
+          if(bodyEl){
+            if(data.suggestion.bids_analyzed > 0){
+              bodyEl.innerHTML=
+                '<div id="suggestion-amount-card" style="background:#fff;border:1px solid var(--br-soft);border-radius:10px;padding:.8rem;margin-bottom:.7rem">' +
+                  '<div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Suggested Winning Bid</div>' +
+                  '<div id="suggestion-amount" style="font-size:1.6rem;font-weight:800;color:var(--br)">PKR ' + Number(data.suggestion.amount).toLocaleString() + '</div>' +
+                '</div>' +
+                '<div style="display:flex;justify-content:center;width:100%;margin-top:10px">' +
+                  '<button type="button" id="use-suggestion-btn" data-amount="' + data.suggestion.amount + '" ' +
+                  'onclick="fillSuggestedBid(' + data.suggestion.amount + ')" ' +
+                  'style="width:50%;background:var(--br);color:#fff;border:none;border-radius:9px;padding:.6rem;font-size:.85rem;font-weight:700;cursor:pointer"> Select</button>' +
+                '</div>';
+            }else{
+              bodyEl.innerHTML=
+                '<div style="font-size:.83rem;color:var(--muted);text-align:center;padding:.5rem">' +
+                  '<i class="bi bi-info-circle me-1" style="color:var(--br)"></i>' +
+                  'Suggestion will appear after the first bid is placed' +
+                '</div>';
+            }
+          }
+        }
+      })
+      .catch(function(err){
+        console.error('[AuctionX] Failed to refresh live auction state:', err);
+      });
+  }
+
+  // If admin deletes THIS auction while someone is viewing it, send them away
+  var feedCh = AuctionXSocket.subscribe('auctions.feed');
+  feedCh.bind('auction.deleted', function(data){
+    if(parseInt(data.auctionId) !== auctionId) return;
+
+    // Show a brief notice then redirect to the auctions list
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;' +
+      'display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML =
+      '<div style="background:#fff;border-radius:14px;padding:2rem;text-align:center;max-width:340px">' +
+        '<i class="bi bi-trash" style="font-size:2rem;color:var(--red);display:block;margin-bottom:.6rem"></i>' +
+        '<div style="font-weight:700;font-size:1rem;margin-bottom:.4rem">Auction Removed</div>' +
+        '<div style="color:var(--muted);font-size:.85rem">This auction has been removed by the admin. Redirecting you now…</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    setTimeout(function(){ window.location.href = '/auctions'; }, 2500);
+  });
 });
 
     // Auto-bid toggle
-    function toggleAutoBid(checkbox){
+  function toggleAutoBid(checkbox){
   const field=document.getElementById('auto_bid_field');
   const input=document.getElementById('max_auto_bid');
  
@@ -455,4 +649,3 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </script>
 @endpush
-

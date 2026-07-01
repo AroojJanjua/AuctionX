@@ -7,6 +7,7 @@ use App\Models\AutoBid;
 use App\Models\Bid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\BidPlaced;
 
 class BidController extends Controller
 {
@@ -56,7 +57,7 @@ class BidController extends Controller
         ]);
 
         // If auto-bid limit is set, it must be >= bid amount
-        $bidAmount =(int)$request->bid_amount;
+        $bidAmount=(int)$request->bid_amount;
          $maxAutoBid=$request->filled('max_auto_bid')? (int)$request->max_auto_bid : null;
  
         if($maxAutoBid !== null && $maxAutoBid < $bidAmount){
@@ -68,7 +69,7 @@ class BidController extends Controller
         DB::transaction(function() use ($bidAmount, $maxAutoBid, $auction, &$sniped){
 
         // Save or update auto-bid limit in its own table
-        if ($maxAutoBid !== null){
+        if($maxAutoBid !== null){
             AutoBid::updateOrCreate(
                 [
                     'auction_id' => $auction->id,
@@ -96,24 +97,26 @@ class BidController extends Controller
                     'ends_at'                => $auction->ends_at->addMinutes(2),
                     'snipe_extension_count'  => $auction->snipe_extension_count + 1,
                 ]);
-                 $sniped = true;               
+                 $sniped=true;               
             }
         // auto bid: check if another bidder can counter
         $this->processAutoBids($auction, auth()->id(),$bidAmount);
         });
         
         if($sniped){
-        session()->flash('info', 'Anti-sniping protection activated — auction timer extended by 2 minutes!');
+        session()->flash('info','Anti-sniping protection activated — auction timer extended by 2 minutes!');
         }
 
         // Re-fetch to get fresh current_bid 
         $auction->refresh();
+
+        broadcast(new BidPlaced($auction,$sniped));
  
-        $isLeading = $auction->bids()
+        $isLeading=$auction->bids()
             ->orderByDesc('amount')
             ->value('bidder_id') === auth()->id();
  
-        if ($isLeading) {
+        if($isLeading){
             return back()->with('success',
                 'Bid placed successfully! You are the highest bidder.' .
                 ($maxAutoBid ? 'Auto-bid is active up to PKR ' . number_format((int) $maxAutoBid) . '.' : ''));
@@ -128,7 +131,7 @@ class BidController extends Controller
     
     if($depth > 20) return;
     // Find competitor from auto_bids table — clean and accurate
-    $competitor = AutoBid::where('auction_id', $auction->id)
+    $competitor=AutoBid::where('auction_id', $auction->id)
         ->where('bidder_id', '!=', $justBiddedBy)
         ->where('max_amount', '>', $currentBid)
         ->orderByDesc('max_amount')

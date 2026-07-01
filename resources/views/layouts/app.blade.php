@@ -180,6 +180,21 @@
     
     {{-- Bootstrap 5 JS --}}
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {{-- Pusher JS + global socket connection for real-time bidding --}}
+  <script src="https://js.pusher.com/8.4/pusher.min.js"></script>
+  <script>
+    // Single shared Pusher connection used across all pages
+    window.AuctionXSocket = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+      cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+      // Required for private channels (admin.feed, seller.{id})
+      authEndpoint: '/broadcasting/auth',
+      auth: {
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+      }
+    });
+  </script>
   {{-- AuctionX JS --}}
   <script src="{{ asset('js/auctionx.js') }}"></script>
   @stack('scripts')

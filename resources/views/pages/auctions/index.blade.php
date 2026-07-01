@@ -123,8 +123,8 @@
       @else
       <div class="row g-3">
           @foreach($auctions as $auction)
-          <div class="col-sm-4  col-xl-4">
-            <div class="auction-card h-100">
+          <div class="col-sm-4 col-xl-4">
+            <div class="auction-card h-100" data-auction-id="{{ $auction->id }}">
             {{-- Image --}}
             <div class="auction-card-img {{ $auction->category }}">
                 @if($auction->image)
@@ -173,10 +173,10 @@
                     <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">
                       Current Bid
                     </div>
-                    <span class="auction-price">PKR {{ number_format($auction->current_bid) }}</span>
+                    <span class="auction-price" id="home-price-{{ $auction->id }}">PKR {{ number_format($auction->current_bid) }}</span>
                   </div>
                   <div class="text-end">
-                    <div style="font-size:.7rem;color:var(--muted)">
+                    <div style="font-size:.7rem;color:var(--muted)" id="home-bids-{{ $auction->id }}">
                       {{ $auction->bids_count }} {{ Str::plural('bid', $auction->bids_count) }} 
                     </div>
                     <span class="auction-timer {{ $auction->ends_soon ? 'ending' : '' }}">
@@ -206,4 +206,75 @@
       </div>
     </div>
   </div>
+
+@push('scripts')
+<script>
+  document.addEventListener('DOMContentLoaded',function(){
+    if(typeof AuctionXSocket === 'undefined') return;
+    document.querySelectorAll('.auction-card[data-auction-id]').forEach(function(card){
+      const auctionId=card.getAttribute('data-auction-id');
+      const channel=AuctionXSocket.subscribe('auction.' + auctionId);
+
+      channel.bind('bid.placed',function(data){
+        const priceEl=document.getElementById('home-price-' + auctionId);
+        const bidsEl=document.getElementById('home-bids-' + auctionId);
+
+        if(priceEl){
+          priceEl.textContent='PKR ' + Number(data.currentBid).toLocaleString();
+          priceEl.style.transition='color .2s';
+          priceEl.style.color='var(--br)';
+          setTimeout(function(){ priceEl.style.color = ''; },800);
+        }
+        if(bidsEl){
+          const word=data.bidsCount === 1 ? 'bid' : 'bids';
+          bidsEl.textContent=data.bidsCount + ' ' + word;
+        }
+      });
+
+      //when this auction closes, dim the card instantly
+      channel.bind('auction.status-changed',function(data){
+        if(data.status !== 'closed') return;
+
+        card.style.opacity='0.5';
+        card.style.pointerEvents='none';
+
+        const timerEl=card.querySelector('.auction-timer');
+        if(timerEl){
+          timerEl.textContent='Ended';
+          timerEl.classList.remove('ending');
+          timerEl.style.color='var(--muted)';
+        }
+
+        const badges=card.querySelector('.auction-card-badges');
+        if(badges){
+          const ended=document.createElement('span');
+          ended.className='badge rounded-pill badge-closed';
+          ended.textContent='Ended';
+          badges.innerHTML='';
+          badges.appendChild(ended);
+        }
+      });
+    });
+  });
+  
+  // Global feed, remove deleted auction cards
+  var feedCh=AuctionXSocket.subscribe('auctions.feed');
+  feedCh.bind('auction.deleted',function(data){
+    var card=document.querySelector('.auction-card[data-auction-id="' + data.auctionId + '"]');
+    if(card){
+      var col=card.closest('[class*="col"]') || card;
+        col.remove();
+    }
+  });
+
+    //scheduled auction to appears it live in the browse grid
+    feedCh.bind('auction.status-changed', function(data){
+    if(data.status !== 'active') return;
+    var alreadyOnPage = document.querySelector('.auction-card[data-auction-id="' + data.auctionId + '"]');
+    if(!alreadyOnPage){
+      location.reload();
+    }
+  });
+</script>
+@endpush
 @endsection

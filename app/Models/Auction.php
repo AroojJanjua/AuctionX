@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Auction extends Model
 {
@@ -149,5 +150,12 @@ class Auction extends Model
             'bids_analyzed' => count($bids),
         ];
     }
-    
+
+    protected static function booted():void{
+    static::deleting(function(Auction $auction){
+        if($auction->image){
+            Storage::disk('public')->delete($auction->image);
+        }
+    });
+}
 }

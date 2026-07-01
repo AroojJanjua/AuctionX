@@ -12,16 +12,16 @@ class AuctionController extends Controller
         
         $query=Auction::with('seller')
             ->withCount('bids')
-            ->where('status', 'active');
-            // ->where('starts_at', '<=', now())
-            // ->where('ends_at', '>', now());
+            ->where('status','active')
+            ->where('starts_at','<=',now())
+            ->where('ends_at','>',now());
 
         // Search 
         if($request->filled('search')){
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title'       ,'like','%'.$search.'%')
-                ->orWhere('description' ,'like','%'.$search.'%');
+            $search=$request->search;
+            $query->where(function ($q) use ($search){
+                $q->where('title','like','%'.$search.'%')
+                ->orWhere('description','like','%'.$search.'%');
             });
         }
 
@@ -71,12 +71,38 @@ class AuctionController extends Controller
 
         $bids=Bid::with('bidder')
             ->where('auction_id', $id)
-            ->orderByDesc('amount')
+            ->orderByDesc('created_at')
             ->get();
 
         $suggestion=$auction->ai_bid_suggestion;
 
         return view('pages.auctions.show',compact('auction','bids','suggestion'));      
+    }
+
+    public function liveData($id){
+        $auction=Auction::withCount('bids')->findOrFail($id);
+        $bids=Bid::with('bidder')
+            ->where('auction_id',$id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function($bid){
+                return[
+                    'bidderName' => $bid->bidder->name,
+                    'isAutoBid'  => (bool) $bid->is_auto_bid,
+                    'amount'     => (int) $bid->amount,
+                    'timeAgo'    => $bid->created_at->diffForHumans(),
+                ];
+            });
+ 
+        return response()->json([
+            'currentBid'  => (int) $auction->current_bid,
+            'minNextBid'  => (int) $auction->min_next_bid,
+            'suggestion'  => $auction->ai_bid_suggestion,
+            'endsAt'      => $auction->ends_at->toIso8601String(),
+            'status'      => $auction->status,
+            'bidsCount'   => $auction->bids_count,
+            'bids'        => $bids,
+        ]);
     }
 
     public static function timeRules():array{
