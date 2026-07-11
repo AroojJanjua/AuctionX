@@ -27,3 +27,9 @@ Broadcast::channel('admin.feed',function($user){
 Broadcast::channel('seller.{sellerId}',function($user,$sellerId){
     return (int) $user->id === (int) $sellerId;
 });
+// ── Private: Per-user notification channel ─────────────────────────────
+// Each user gets their own channel: user.5, user.12, etc.
+// Only that exact user can subscribe.
+Broadcast::channel('user.{userId}',function ($user,$userId){
+    return (int) $user->id === (int) $userId;
+});

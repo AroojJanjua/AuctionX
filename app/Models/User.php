@@ -36,6 +36,9 @@ class User extends Authenticatable
     public function bids(){
         return $this->hasMany(Bid::class, 'bidder_id');
     }
+    public function notifications(){
+        return $this->hasMany(Notification::class);
+    }
  
     // Helpers
     public function isAdmin():bool{

@@ -83,12 +83,6 @@
  
       <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem">
  
-        @if(session('success'))
-          <div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:10px;padding:.85rem;margin-bottom:1.2rem;font-size:.85rem;font-weight:700;color:var(--green)">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-          </div>
-        @endif
- 
         <form method="POST" action="{{ route('contact') }}">
           @csrf
           <div class="mb-3">

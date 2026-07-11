@@ -6,6 +6,7 @@ use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\User;
 use App\Models\AutoBid;
+use App\Models\Notification;
 use App\Events\AuctionApproved;
 use App\Events\AuctionStatusChanged;
 use App\Events\AuctionDeleted;
@@ -57,6 +58,17 @@ class AdminController extends Controller
         // Tell the seller their auction was approved and update status badge
         broadcast(new AuctionApproved($auction));
 
+        //notify seller
+        Notification::send(
+            $auction->seller_id,
+            'auction_approved',
+            'Your auction was approved!',
+            $status === 'active'
+                ? '"' . $auction->title . '" is now live and accepting bids.'
+                : '"' . $auction->title . '" is approved and will go live at its scheduled start time.',
+            $auction->id
+        );
+
         $msg=$status === 'active'
             ? 'Auction approved and set to active.'
             : 'Auction approved — will go live automatically at its scheduled start time.';
@@ -76,6 +88,27 @@ class AdminController extends Controller
         // Reload so winner relationship is fresh after the update
         $auction->load('winner');
         broadcast(new AuctionStatusChanged($auction));
+
+        //notify seller
+        Notification::send(
+            $auction->seller_id,
+            'auction_closed',
+            'Your auction has ended',
+            '"' . $auction->title . '" has been closed.' .
+            ($highestBid ? ' Winning bid: PKR ' . number_format($highestBid->amount) . '.' : ' No bids were placed.'),
+            $auction->id
+        );
+ 
+        //notify winner
+        if($highestBid){
+            Notification::send(
+                $highestBid->bidder_id,
+                'auction_won',
+                'You won the auction!',
+                'Congratulations! You won "' . $auction->title . '" with a bid of PKR ' . number_format($highestBid->amount) . '.',
+                $auction->id
+            );
+        }
         return back()->with('success', 'Auction closed.');
     }
 
@@ -97,6 +130,16 @@ class AdminController extends Controller
         $auction->delete();
  
         broadcast(new AuctionDeleted($auctionId, $sellerId, $title));
+
+        //notify seller (auction_id=null bcoz record is deleted)
+        Notification::send(
+            $sellerId,
+            'auction_deleted',
+            'Your auction was removed',
+            '"' . $title . '" has been removed by an admin.',
+            null
+        );
+        
         return redirect()->route('admin.auctions.index')->with('success', 'Auction deleted.');
     }
 

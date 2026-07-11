@@ -71,6 +71,7 @@ class AuctionController extends Controller
 
         $bids=Bid::with('bidder')
             ->where('auction_id', $id)
+            ->orderByDesc('amount')
             ->orderByDesc('created_at')
             ->get();
 
@@ -83,6 +84,7 @@ class AuctionController extends Controller
         $auction=Auction::withCount('bids')->findOrFail($id);
         $bids=Bid::with('bidder')
             ->where('auction_id',$id)
+            ->orderByDesc('amount')
             ->orderByDesc('created_at')
             ->get()
             ->map(function($bid){

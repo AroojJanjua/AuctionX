@@ -80,9 +80,48 @@
             <a href="{{ route('login') }}" class="btn btn-ghost-ax btn-sm px-3">Sign In</a>
             <a href="{{ route('register') }}" class="btn btn-brown btn-sm px-3">Register</a>
           @else
-            <button class="btn btn-ghost-ax btn-sm px-2" title="Notifications">
-              <i class="bi bi-bell"></i>
-            </button>
+            {{-- Notification Bell --}}
+            @auth
+            <div class="dropdown" id="notifDropdown">
+              <button
+                class="btn btn-ghost-ax btn-sm px-2 position-relative"
+                id="notifBell"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+                aria-expanded="false"
+                title="Notifications"
+                onclick="loadNotifDropdown()">
+                <i class="bi bi-bell"></i>
+                <span id="notifBadge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                  style="background:var(--br);font-size:.6rem;padding:2px 5px;display:none">0</span>
+              </button>
+
+              <div class="dropdown-menu dropdown-menu-end p-0 shadow"
+                style="width:320px;border-radius:14px;border:1px solid var(--border);font-family:'Nunito',sans-serif;overflow:hidden">
+
+                {{-- Header --}}
+                <div class="d-flex align-items-center justify-content-between px-3 py-2"
+                  style="border-bottom:1px solid var(--border)">
+                  <span style="font-weight:700;font-size:.88rem">Notifications</span>
+                  <div class="d-flex gap-2 align-items-center">
+                    <button onclick="markAllRead()" class="btn btn-ghost-ax btn-sm"
+                      style="font-size:.72rem;padding:2px 8px">Mark all read</button>
+                    <a href="{{ route('notifications.index') }}"
+                      style="font-size:.72rem;color:var(--br);font-weight:600;text-decoration:none">See all</a>
+                  </div>
+                </div>
+
+                {{-- List --}}
+                <div id="notifList" style="max-height:380px;overflow-y:auto">
+                  <div id="notifLoading" class="text-center py-4" style="color:var(--muted);font-size:.82rem">
+                    <i class="bi bi-hourglass-split me-1"></i> Loading…
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            @endauth
             {{-- User Dropdown --}}
             <div class="dropdown">
               <button class="btn btn-ghost-ax btn-sm px-3 dropdown-toggle" data-bs-toggle="dropdown">
@@ -129,7 +168,6 @@
       </div>
     </div>
   </nav>
-
 
   {{-- PAGE CONTENT --}}
   <main>
@@ -197,6 +235,126 @@
   </script>
   {{-- AuctionX JS --}}
   <script src="{{ asset('js/auctionx.js') }}"></script>
+
+  @foreach(['success', 'error', 'info'] as $type)
+  @if(session($type))
+    <script>
+      document.addEventListener('DOMContentLoaded',function(){
+        showToast(null,{
+           type:'{{ $type }}',
+           title:@json(session($type)) 
+          });
+      });
+    </script>
+  @endif
+  @endforeach
+
+  @auth
+  <script>
+
+
+  //badge helpers
+  function getUnreadCount(){ 
+    var b=document.getElementById('notifBadge'); 
+    return b?(parseInt(b.textContent,10)||0):0; 
+  }
+  function setUnreadCount(n){
+    var b=document.getElementById('notifBadge');
+    if(!b) return;
+    if(n<=0){ 
+      b.style.display='none'; 
+      b.textContent='0'; return; 
+    }
+    b.textContent=n>99?'99+':n; 
+    b.style.display='';
+  }
+  function incUnread(){ 
+    setUnreadCount(getUnreadCount()+1); 
+  }
+
+  //build one dropdown row
+  function buildNotifRow(n){
+    var href=n.auctionId ? '/auctions/'+n.auctionId : '/notifications';
+    var bg=n.isUnread ? 'background:#FFF5F2' : '';
+    return '<a href="'+href+'" class="d-flex align-items-start gap-2 px-3 py-2 text-decoration-none notif-row"'+
+      'data-notif-id="'+n.id+'" style="border-bottom:1px solid var(--border);'+bg+';"'+
+      'onclick="markOneRead(event,\''+n.id+'\')">' +
+      '<div class="flex-grow-1" style="min-width:0">'+
+      '<div style="font-weight:'+(n.isUnread?'700':'500')+';font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+n.title+'</div>'+
+      '<div style="font-size:.75rem;color:var(--muted);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+n.message+'</div>'+
+      '<div style="font-size:.7rem;color:var(--muted);margin-top:2px">'+(n.ago||'')+'</div></div></a>';
+  }
+
+  //load dropdown via AJAX
+  var notifLoaded=false;
+  function loadNotifDropdown(){
+    fetch('/notifications/dropdown',{headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){
+        return r.json();
+      })
+      .then(function(data){
+        notifLoaded=true; //only mark loaded on success
+        setUnreadCount(data.unreadCount);
+        var list=document.getElementById('notifList');
+        list.innerHTML=data.notifications.map(buildNotifRow).join('');
+      }).catch(function(){});
+  }
+
+  //mark one as read
+  function markOneRead(e,id){
+    fetch('/notifications/'+id+'/read',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','X-Requested-With':'XMLHttpRequest'}});
+    var row=document.querySelector('[data-notif-id="'+id+'"]');
+    if(row){ 
+      row.style.background=''; 
+      var t=row.querySelector('[style*="font-weight:700"]'); 
+    if(t) 
+    t.style.fontWeight='500'; 
+  }
+    var c=getUnreadCount(); 
+    if(c>0) 
+       setUnreadCount(c-1);
+  }
+
+  //mark all as read
+  function markAllRead(){
+    fetch('/notifications/mark-all',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','X-Requested-With':'XMLHttpRequest'}});
+    setUnreadCount(0);
+    document.querySelectorAll('.notif-row').forEach(function(row){
+      row.style.background='';
+      var t=row.querySelector('[style*="font-weight:700"]'); 
+      if(t) 
+       t.style.fontWeight='500';
+    });
+  }
+
+  //pusher confi for real time updation
+  var userCh=AuctionXSocket.subscribe('private-user.{{ auth()->id() }}');
+  userCh.bind('notification.sent',function(data){
+    incUnread();
+    var list=document.getElementById('notifList');
+    if(list && notifLoaded){
+      data.isUnread=true;
+      list.insertAdjacentHTML('afterbegin',buildNotifRow(data));
+      var rows=list.querySelectorAll('.notif-row');
+      if(rows.length>8) 
+        rows[rows.length-1].remove();
+    }
+    showToast(null,{
+      type:'info',
+      title:data.title,
+      sub:data.message
+    });
+  });
+
+  //load badge count
+  fetch('/notifications/dropdown',{headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){return r.json();})
+    .then(function(d){setUnreadCount(d.unreadCount);})
+    .catch(function(){});
+
+  </script>
+  @endauth
+
   @stack('scripts')
 </body>
 </html>

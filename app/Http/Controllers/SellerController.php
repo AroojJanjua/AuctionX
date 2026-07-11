@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Auction;
 use App\Models\Bid;
+use App\Models\User;
+use App\Models\Notification;
 use App\Events\AuctionSubmitted;
 use App\Events\AuctionDeleted;
 use Illuminate\Http\Request;
@@ -93,8 +95,19 @@ class SellerController extends Controller
             'status'       => 'draft', // always draft bcoz needs admin approval
         ]);
 
-         // Notify admin in real time — they'll see the new row appear without refreshing
+         //notify admin to see the new row appear
         broadcast(new AuctionSubmitted($auction->load('seller')));
+
+        $adminIds=User::where('role','admin')->pluck('id');
+        foreach($adminIds as $adminId){
+            Notification::send(
+                $adminId,
+                'auction_submitted',
+                'New auction submitted',
+                '"' . $auction->title . '" by ' . $auction->seller->name . ' is awaiting your approval.',
+                $auction->id
+            );
+        }
 
         return redirect()->route('seller.dashboard')
             ->with('success','Auction submitted for review. Admin will approve it shortly.');

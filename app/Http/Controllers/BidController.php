@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Auction;
 use App\Models\AutoBid;
 use App\Models\Bid;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\BidPlaced;
@@ -61,7 +62,7 @@ class BidController extends Controller
          $maxAutoBid=$request->filled('max_auto_bid')? (int)$request->max_auto_bid : null;
  
         if($maxAutoBid !== null && $maxAutoBid < $bidAmount){
-            return back()->withInput()->with(['error' => 'Auto-bid limit must be greater than or equal to your bid amount.']);
+            return back()->with(['error' => 'Auto-bid limit must be greater than or equal to your bid amount.']);
         }
 
         // Place bid inside a transaction
@@ -109,12 +110,61 @@ class BidController extends Controller
 
         // Re-fetch to get fresh current_bid 
         $auction->refresh();
-
         broadcast(new BidPlaced($auction,$sniped));
  
-        $isLeading=$auction->bids()
-            ->orderByDesc('amount')
-            ->value('bidder_id') === auth()->id();
+        //notify seller about new bid on their auction
+        Notification::send(
+            $auction->seller_id,
+            'bid_placed',
+            'New bid on your auction',
+            auth()->user()->name . ' placed PKR ' . number_format($auction->current_bid) . ' on "' . $auction->title . '".',
+            $auction->id
+        );       
+        
+        $leadingBid=$auction->bids()->orderByDesc('amount')->first();
+        $isLeading=$leadingBid?->bidder_id === auth()->id();
+ 
+        if(!$isLeading){
+            // Current user was outbid and has no auto-bid covering the new price — notify them once
+            $hasAutoBidCovering=AutoBid::where('auction_id',$auction->id)
+                ->where('bidder_id',auth()->id())
+                ->where('max_amount','>=',$auction->current_bid)
+                ->exists();
+ 
+            if(!$hasAutoBidCovering){
+                Notification::send(
+                    auth()->id(),
+                    'outbid',
+                    'You have been outbid!',
+                    'Your bid on "' . $auction->title . '" was outbid. Current price: PKR ' . number_format($auction->current_bid) . '.',
+                    $auction->id
+                );
+            }
+        }else{
+            //current user is leading, notify the person who in second place
+            //only if they have no auto-bid covering (meaning they really lost)
+            $secondPlace=Bid::where('auction_id',$auction->id)
+                ->where('bidder_id','!=',auth()->id())
+                ->orderByDesc('amount')
+                ->value('bidder_id');
+ 
+            if($secondPlace){
+                $secondHasAutoBid=AutoBid::where('auction_id',$auction->id)
+                    ->where('bidder_id',$secondPlace)
+                    ->where('max_amount','>=',$auction->current_bid)
+                    ->exists();
+ 
+                if(!$secondHasAutoBid){
+                    Notification::send(
+                        $secondPlace,
+                        'outbid',
+                        'You have been outbid!',
+                        'Someone placed a higher bid on "' . $auction->title . '". Current price: PKR ' . number_format($auction->current_bid) . '.',
+                        $auction->id
+                    );
+                }
+            }
+        }
  
         if($isLeading){
             return back()->with('success',

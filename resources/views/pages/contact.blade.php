@@ -19,12 +19,6 @@
           <i class="bi bi-chat-dots me-1"></i>Send us a message
         </div>
  
-        @if(session('success'))
-          <div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:10px;padding:.9rem 1rem;margin-bottom:1.2rem;font-size:.88rem;color:var(--green);font-weight:700">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-          </div>
-        @endif
- 
         <form method="POST" action="#">
           @csrf
           <div class="row g-3">

@@ -10,6 +10,8 @@ use App\Http\Controllers\SellerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\NotificationController;
+
 
 
 Broadcast::routes(['middleware' => ['auth']]);
@@ -53,6 +55,13 @@ Route::middleware('auth')->group(function(){
     // My Bids
     Route::get('/my-bids',          [BidController::class, 'myBids'])->name('my-bids');
 
+  // ── Notifications ─────────────────────────────────────────────────────
+    Route::get('/notifications',            [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/dropdown',   [NotificationController::class, 'dropdown'])->name('notifications.dropdown');
+    Route::post('/notifications/mark-all',  [NotificationController::class, 'markAllRead'])->name('notifications.mark-all');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::delete('/notifications/{id}',    [NotificationController::class, 'destroy'])->name('notifications.destroy');
+ 
 });
 
 Route::middleware(['auth', 'role:bidder,seller,admin'])->group(function(){
