@@ -57,6 +57,7 @@ a:hover{
 .ax-navbar .navbar-toggler{ 
     border-color: var(--border); 
 }
+
 /* Search Bar  */
 .ax-search-form .form-control{
       border: 1.5px solid var(--border);
@@ -98,6 +99,7 @@ a:hover{
         border-right: none; 
       }
     }
+
 /* Buttons */
 .btn-brown{
   background-color: var(--br);
@@ -123,7 +125,6 @@ a:hover{
 .btn-brown-outline:hover{ 
     background: var(--br-pale); color: var(--br); border-color: var(--br); 
 }
-
 .btn-green{
   background-color: var(--green);
   color: #fff;
@@ -134,7 +135,6 @@ a:hover{
 .btn-green:hover{ 
     background-color: #1B5E20; color: #fff; 
 }
-
 .btn-ghost-ax{
   background: transparent;
   color: var(--muted);
@@ -182,6 +182,7 @@ a:hover{
   color: var(--br);
   line-height: 1.2;
 }
+
 /* Featured Card */
 .feat-card{
   background: #fff;
@@ -239,6 +240,7 @@ a:hover{
     font-size: 0.62rem; 
     color: var(--muted); 
 }
+
 /* Badges */
 .badge-timed{ 
     background: var(--green-bg); 
@@ -273,7 +275,6 @@ a:hover{
   background: var(--color-background-success,#E8F5E9); 
   color: #2E7D32; 
 }
-
 
 /* Auction Cards */
 .auction-card{
@@ -333,6 +334,7 @@ a:hover{
   border-radius: 4px;
   font-weight: 600;
 }
+
 /* Filters */
 .filter-btn{
   background: #fff;
@@ -512,7 +514,6 @@ a:hover{
   background: var(--border);
 }
 
-/* Toast Notifications */
 /* Footer */
 .ax-footer{
   background: #fff;
@@ -536,6 +537,7 @@ a:hover{
 .ax-footer .footer-link:hover{ 
     color: var(--br); 
 }
+
 /* Page Header */
 .page-header{
   background: var(--br-pale);

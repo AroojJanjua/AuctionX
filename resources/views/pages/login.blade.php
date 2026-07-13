@@ -51,7 +51,7 @@
           <label class="form-label-ax mb-0" for="password">
             <i class="bi bi-lock me-1"></i>Password
           </label>
-            <a style="font-size:0.8rem;color:var(--br);text-decoration:none;font-weight:600">
+            <a href="{{ route('password.request') }}" style="font-size:0.8rem;color:var(--br);text-decoration:none;font-weight:600">
               Forgot password?
             </a>
         </div>

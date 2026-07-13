@@ -13,13 +13,13 @@ class LoginController extends Controller
         return view('pages.login');
     }
      public function login(Request $request){
-        $credentials = $request->validate([
+        $credentials=$request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
         ]);
 
          // Check if user is banned
-        $user = User::where('email', $request->email)->first();
+        $user=User::where('email', $request->email)->first();
 
         if ($user && $user->is_banned){
             return back()->withInput($request->only('email'))
@@ -49,9 +49,9 @@ class LoginController extends Controller
     // Redirect to the correct dashboard based on user role
     public function redirectBasedOnRole()
     {
-        $role = auth()->user()->role;
+        $role=auth()->user()->role;
  
-        return match ($role) {
+        return match($role){
             'admin'  => redirect()->route('admin.dashboard'),
             'seller' => redirect()->route('seller.dashboard'),
             default  => redirect()->route('home'),

@@ -33,7 +33,7 @@ class RegisterController extends Controller
             'password.confirmed' => 'The passwords you entered do not match.',
         ]);
 
-        $user = User::create([
+        $user=User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'phone'    => $request->phone,
@@ -47,13 +47,11 @@ class RegisterController extends Controller
         Auth::login($user);
         
         // Redirect based on role
-        if ($user->role === 'seller') {
-            return redirect()->route('seller.dashboard')
-                ->with('success', 'Welcome to AuctionX! Your seller account is ready.');
+        if($user->role === 'seller'){
+            return redirect()->route('seller.dashboard')->with('success','Welcome to AuctionX! Your seller account is ready.');
         }
 
-        return redirect()->route('home')
-            ->with('success', 'Welcome to AuctionX! Start exploring auctions.');
+        return redirect()->route('home')->with('success','Welcome to AuctionX! Start exploring auctions.');
     }
 }
 
