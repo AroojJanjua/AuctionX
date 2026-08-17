@@ -4,7 +4,7 @@
 
 <div class="page-header">
   <div class="container">
-    <h2><i class="bi bi-building me-2"></i>About AuctionX</h2>
+    <h2>About AuctionX</h2>
     <p>The trusted online auction platform for buyers and sellers</p>
   </div>
 </div>

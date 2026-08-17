@@ -98,22 +98,15 @@
 
         {{-- Image  --}}
         <div class="form-section">
-          <div class="form-section-title">
-            <i class="bi bi-images me-2"></i>Item Image
+          <div class="form-section-title mb-3">
+            <label for="image" id="dropZone" class="form-label-ax">Item Image</label>
+            <div style="border:2px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;
+            cursor:pointer;transition:border-color .2s" onclick="document.getElementById('image').click()">
+            <i class="bi bi-cloud-upload" style="font-size:1.8rem;color:var(--muted);display:block;margin-bottom:.4rem"></i>
+            <div id="img-text" style="font-size:.85rem;color:var(--muted)">Click to upload image</div>
+            <img id="img-preview" src="" alt="" style="display:none;max-width:100%;border-radius:8px;margin-top:.8rem">
           </div>
-          <label for="image" id="dropZone"
-            style="display:block;border:2px dashed var(--border);border-radius:12px;
-                   padding:2.5rem;text-align:center;cursor:pointer;
-                   background:var(--surface);transition:border-color .15s"
-            onmouseover="this.style.borderColor='var(--br)'"
-            onmouseout="this.style.borderColor='var(--border)'">
-            <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:var(--muted)"></i>
-            <div style="font-weight:700;color:var(--text);margin-top:.5rem">Click to upload image</div>
-            <div id="fileName" style="font-size:.82rem;color:var(--br);margin-top:8px;font-weight:600"></div>
-          </label>
-          <input type="file" id="image" name="image" accept="image/*" class="d-none"
-                 onchange="document.getElementById('fileName').textContent = this.files[0]?.name || ''" />
-          @error('image') <div class="field-error mt-1">{{ $message }}</div> @enderror
+          <input type="file" id="image" name="image" accept="image/jpeg,image/png" style="display:none" onchange="previewImg(this)"> 
         </div>
 
         {{-- Auction Schedule & Stating bid  --}}
@@ -194,6 +187,15 @@
 
 @push('scripts')
 <script>
+  function previewImg(input){ 
+    if(input.files && input.files[0]){ 
+      const file=input.files[0]; 
+      document.getElementById('img-text').textContent=file.name;
+       const preview=document.getElementById('img-preview');
+        preview.src=URL.createObjectURL(file); 
+        preview.style.display='block';
+       }
+    } 
 document.addEventListener('DOMContentLoaded', function(){
   const startsInput=document.getElementById('starts_at');
   const endsInput=document.getElementById('ends_at');

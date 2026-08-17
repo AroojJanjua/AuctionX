@@ -16,6 +16,7 @@ class User extends Authenticatable
         'name', 'email', 'phone', 'password',
         'role', 'avatar', 'bio', 'address',
         'city', 'country', 'is_banned', 'email_verified',
+        'payout_method', 'payout_account_number', 'payout_account_name',
     ];
 
     protected $hidden=[
@@ -49,5 +50,8 @@ class User extends Authenticatable
     }
     public function isBidder():bool{
         return $this->role === 'bidder';
+    }
+    public function hasPayoutDetails():bool{
+        return !empty($this->payout_method) && !empty($this->payout_account_number);
     }
 }

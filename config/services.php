@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'jazzcash' => [
+        'account_number' => env('JAZZCASH_ACCOUNT_NUMBER'),
+        'account_name'   => env('JAZZCASH_ACCOUNT_NAME'),
+    ],
+ 
+    'easypaisa' => [
+        'account_number' => env('EASYPAISA_ACCOUNT_NUMBER'),
+        'account_name'   => env('EASYPAISA_ACCOUNT_NAME'),
+    ],
+
 ];

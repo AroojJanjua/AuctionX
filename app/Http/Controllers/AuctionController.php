@@ -65,7 +65,7 @@ class AuctionController extends Controller
     }
 
     public function show($id){
-        $auction=Auction::with('seller')
+        $auction=Auction::with(['seller', 'winner', 'payment'])            
             ->withCount('bids')
             ->findOrFail($id);
 

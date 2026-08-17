@@ -13,8 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificationController;
-
-
+use App\Http\Controllers\PaymentController;
 
 Broadcast::routes(['middleware' => ['auth']]);
 
@@ -63,6 +62,16 @@ Route::middleware('auth')->group(function(){
     // My Bids
     Route::get('/my-bids',          [BidController::class, 'myBids'])->name('my-bids');
 
+    // Payments — buyer and seller access
+    Route::get('/payment/{auction}/checkout',         [PaymentController::class, 'checkout'])->name('payment.checkout');
+    Route::post('/payment/{auction}/submit',          [PaymentController::class, 'submit'])->name('payment.submit');
+    Route::get('/payment/{auction}/status',           [PaymentController::class, 'status'])->name('payment.status');
+    Route::get('/payment/{payment}/ship',             [PaymentController::class, 'shipForm'])->name('payment.ship.form');
+    Route::post('/payment/{payment}/ship',            [PaymentController::class, 'ship'])->name('payment.ship');
+    Route::post('/payment/{payment}/confirm-receipt', [PaymentController::class, 'confirmReceipt'])->name('payment.confirm-receipt');
+    Route::post('/payment/{payment}/dispute',         [PaymentController::class, 'dispute'])->name('payment.dispute');
+ 
+
   // ── Notifications ─────────────────────────────────────────────────────
     Route::get('/notifications',            [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/dropdown',   [NotificationController::class, 'dropdown'])->name('notifications.dropdown');
@@ -88,6 +97,8 @@ Route::middleware(['auth','role:seller,admin'])->prefix('seller')->name('seller.
     Route::delete('/{id}',         [SellerController::class, 'destroy'])->name('destroy');
     // Listing analytics 
     Route::get('/{id}/bids',       [SellerController::class, 'bids'])->name('bids');  
+    // Earnings / payment history
+    Route::get('/earnings',        [SellerController::class, 'earnings'])->name('earnings');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function(){
@@ -114,6 +125,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::prefix('bids')->name('bids.')->group(function () {
         Route::get('/',              [AdminController::class, 'bids'])->name('index');
         Route::delete('/{id}',       [AdminController::class, 'destroyBid'])->name('destroy');
+    });
+
+    // Manage Payments (Escrow)
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/',                   [PaymentController::class, 'index'])->name('index');
+        Route::post('/{payment}/confirm', [PaymentController::class, 'confirm'])->name('confirm');
+        Route::post('/{payment}/release', [PaymentController::class, 'release'])->name('release');
+        Route::post('/{payment}/refund',  [PaymentController::class, 'refund'])->name('refund');
     });
 
 });

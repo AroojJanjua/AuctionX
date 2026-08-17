@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Auction;
+use App\Models\Payment;
 use App\Models\Notification;
 use App\Events\AuctionStatusChanged;
 
@@ -45,6 +46,21 @@ class ActivateCloseAuctions extends Command
             ]);
             $auction->load('winner');
             broadcast(new AuctionStatusChanged($auction));
+
+             if($highestBid){
+                $fees=Payment::calculateFee((float) $auction->current_bid);
+                Payment::firstOrCreate(
+                    ['auction_id' => $auction->id],
+                    [
+                        'buyer_id'      => $highestBid->bidder_id,
+                        'seller_id'     => $auction->seller_id,
+                        'amount'        => $auction->current_bid,
+                        'platform_fee'  => $fees['fee'],
+                        'seller_amount' => $fees['sellerAmount'],
+                        'status'        => 'pending',
+                    ]
+                );
+            }
 
             //notify seller auction ended
             Notification::send(

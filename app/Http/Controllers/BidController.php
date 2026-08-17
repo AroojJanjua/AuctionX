@@ -93,9 +93,9 @@ class BidController extends Controller
 
         //Anti sniping
             $minutesLeft=now()->diffInMinutes($auction->ends_at, false);
-            if($minutesLeft >= 0 && $minutesLeft <= 1 && $auction->snipe_extension_count < 5){
+            if($minutesLeft >= 0 && $minutesLeft <= 1 && $auction->snipe_extension_count < 3){
                 $auction->update([
-                    'ends_at'                => $auction->ends_at->addMinutes(2),
+                    'ends_at'                => $auction->ends_at->addMinutes(1),
                     'snipe_extension_count'  => $auction->snipe_extension_count + 1,
                 ]);
                  $sniped=true;               

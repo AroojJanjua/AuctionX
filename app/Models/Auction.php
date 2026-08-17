@@ -36,8 +36,13 @@ class Auction extends Model
     public function bids(){
         return $this->hasMany(Bid::class);
     }
+    
     public function autoBids(){
         return $this->hasMany(AutoBid::class);
+    }
+
+    public function payment(){
+        return $this->hasOne(Payment::class);
     }
 
     // Accessors

@@ -139,6 +139,14 @@
                     <i class="bi bi-coin me-2"></i>My Bids
                   </a>
                 </li>
+                @if(in_array(auth()->user()->role, ['seller','admin']))
+                <li>
+                  <a class="dropdown-item {{ request()->routeIs('seller.earnings') }}"
+                     href="{{ route('seller.earnings') }}">
+                    <i class="bi bi-cash me-2"></i>My Earnings
+                  </a>
+                </li>
+                @endif
                 @if(auth()->user()->role === 'admin')
                 <li><hr class="dropdown-divider"></li>
                 <li>
@@ -146,7 +154,14 @@
                     <i class="bi bi-bar-chart me-2"></i>Reports
                   </a>
                 </li>
+                @if(Route::has('admin.payments.index'))
                 <li>
+                  <a class="dropdown-item {{ request()->routeIs('admin.payments.*') }}"
+                     href="{{ route('admin.payments.index') }}">
+                    <i class="bi bi-wallet me-2"></i>Payments
+                  </a>
+                </li>
+                @endif
                   <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
                     <i class="bi bi-shield-check me-2"></i>Admin Panel
                   </a>

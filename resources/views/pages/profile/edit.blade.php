@@ -4,7 +4,7 @@
 
 <div class="page-header">
   <div class="container">
-    <h2><i class="bi bi-pencil me-2"></i>Edit Profile</h2>
+    <h2>Edit Profile</h2>
     <p>Update your account information</p>
   </div>
 </div>
@@ -64,12 +64,60 @@
                       placeholder="Tell something about you...">{{ old('bio', $user->bio) }}</textarea>
           </div>
 
-          <button type="submit" class="btn btn-brown px-5">
-            <i class="bi bi-check2 me-2"></i>Save Changes
-          </button>
+          <button type="submit" class="btn btn-brown-outline px-5">Save</button>
       </form>
-
     </div>
+
+      @if(in_array($user->role,['seller','admin']))
+      {{-- Payout Details --}}
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.8rem;margin-bottom:1.2rem">
+        <div class="section-title mb-4" style="font-size:1rem">
+          <i class="bi bi-cash me-1"></i>Payout Details
+        </div>
+        <form method="POST" action="{{ route('profile.update') }}">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="name" value="{{ $user->name }}">
+          <input type="hidden" name="email" value="{{ $user->email }}">
+          <input type="hidden" name="phone" value="{{ $user->phone }}">
+          <input type="hidden" name="city" value="{{ $user->city }}">
+          <input type="hidden" name="country" value="{{ $user->country }}">
+          <input type="hidden" name="bio" value="{{ $user->bio }}">
+    
+          <div class="mb-3">
+            <label class="form-label-ax">Payout Method</label>
+            <select name="payout_method" class="form-control-ax @error('payout_method') is-invalid @enderror">
+              <option value="">Select method</option>
+              <option value="jazzcash"  {{ old('payout_method', $user->payout_method) === 'jazzcash'  ? 'selected' : '' }}>JazzCash</option>
+              <option value="easypaisa" {{ old('payout_method', $user->payout_method) === 'easypaisa' ? 'selected' : '' }}>EasyPaisa</option>
+            </select>
+            @error('payout_method')
+              <div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>
+            @enderror
+          </div>
+    
+          <div class="mb-3">
+            <label class="form-label-ax">Account Number</label>
+            <input type="text" name="payout_account_number" class="form-control-ax @error('payout_account_number') is-invalid @enderror"
+                   value="{{ old('payout_account_number', $user->payout_account_number) }}" placeholder="Enter account number" />
+            @error('payout_account_number')
+              <div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>
+            @enderror
+          </div>
+    
+          <div class="mb-4">
+            <label class="form-label-ax">Account Holder Name</label>
+            <input type="text" name="payout_account_name" class="form-control-ax @error('payout_account_name') is-invalid @enderror"
+                   value="{{ old('payout_account_name', $user->payout_account_name) }}" placeholder="Name as registered on the account" />
+            @error('payout_account_name')
+              <div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>
+            @enderror
+          </div>
+    
+          <button type="submit" class="btn btn-brown-outline px-5">Save</button>
+        </form>
+      </div>
+      @endif
 
   {{-- Change Password  --}}
     <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.8rem">
@@ -101,9 +149,7 @@
                    placeholder="Repeat new password" />
           </div>
 
-          <button type="submit" class="btn btn-brown-outline px-5">
-            <i class="bi bi-lock me-2"></i>Update Password
-          </button>
+          <button type="submit" class="btn btn-brown-outline px-5">Update</button>
         </form>
 
     </div>

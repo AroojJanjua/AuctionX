@@ -7,6 +7,7 @@ use App\Models\Bid;
 use App\Models\User;
 use App\Models\AutoBid;
 use App\Models\Notification;
+use App\Models\Payment;
 use App\Events\AuctionApproved;
 use App\Events\AuctionStatusChanged;
 use App\Events\AuctionDeleted;
@@ -88,6 +89,21 @@ class AdminController extends Controller
         // Reload so winner relationship is fresh after the update
         $auction->load('winner');
         broadcast(new AuctionStatusChanged($auction));
+
+         if($highestBid){
+            $fees=Payment::calculateFee((int) $auction->current_bid);
+            Payment::firstOrCreate(
+                ['auction_id' => $auction->id],
+                [
+                    'buyer_id'      => $highestBid->bidder_id,
+                    'seller_id'     => $auction->seller_id,
+                    'amount'        => $auction->current_bid,
+                    'platform_fee'  => $fees['fee'],
+                    'seller_amount' => $fees['sellerAmount'],
+                    'status'        => 'pending',
+                ]
+            );
+        }
 
         //notify seller
         Notification::send(

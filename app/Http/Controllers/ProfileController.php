@@ -20,14 +20,16 @@ class ProfileController extends Controller
     // Update profile personal information
     public function update(Request $request){
         $user=auth()->user();
-        $validated = $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+        $validated=$request->validate([
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email|unique:users,email,' . $user->id,
             'phone'   => 'nullable|string|max:20',
             'city'    => 'nullable|string|max:100',
             'country' => 'nullable|string|max:100',
             'bio'     => 'nullable|string|max:500',
+            'payout_method'         => 'nullable|in:jazzcash,easypaisa',
+            'payout_account_number' => 'nullable|string|max:30|required_with:payout_method',
+            'payout_account_name'   => 'nullable|string|max:100|required_with:payout_method',
         ]);
         $user->update($validated);
         return back()->with('success','Profile updated successfully.');

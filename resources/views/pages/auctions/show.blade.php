@@ -92,13 +92,6 @@
             <div style="font-size:.75rem;color:var(--muted)">{{ $auction->ends_at->format('h:i A') }}</div>
           </div>
         </div>
-
-        @if($auction->snipe_extension_count > 0)
-          <div style="margin-top:.7rem;font-size:.78rem;color:var(--red);font-weight:700;text-align:center">
-            <i class="bi bi-shield-exclamation me-1"></i>
-            Anti-sniping active — timer extended {{ $auction->snipe_extension_count }} {{ Str::plural('time',$auction->snipe_extension_count) }}
-          </div>
-        @endif
     </div>
 
     {{-- Bid history table --}}
@@ -187,7 +180,8 @@
               <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">Starts in</div>
               @else
               <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">Ends in</div>
-              @endif              <div class="d-flex gap-1">
+              @endif              
+              <div class="d-flex gap-1">
                 <div class="countdown-unit">
                   <span class="countdown-num" id="show-h">00</span>
                   <span class="countdown-lbl">hrs</span>
@@ -201,6 +195,12 @@
                   <span class="countdown-lbl">sec</span>
                 </div>
               </div>
+              @if($auction->snipe_extension_count > 0)
+          <div style="margin-top:.7rem;font-size:.78rem;color:var(--red);font-weight:700;text-align:center">
+            <i class="bi bi-shield-exclamation me-1"></i>
+            Anti-sniping active <br> timer extended {{ $auction->snipe_extension_count }} {{ Str::plural('time',$auction->snipe_extension_count) }}
+          </div>
+        @endif
             </div>
         </div>
 
@@ -379,6 +379,19 @@
                 Won by <strong>{{ $auction->winner->name }}</strong>
                 for <strong>PKR {{ number_format($auction->current_bid) }}</strong>
               </div>
+            @auth
+                @if(auth()->id() === $auction->winner_id)
+                  @if(!$auction->payment || $auction->payment->isPending())
+                    <a href="{{ route('payment.checkout', $auction->id) }}"
+                       class="btn btn-green btn-sm mt-1">
+                       Pay Now</a>
+                  @else
+                    <a href="{{ route('payment.status', $auction->id) }}"
+                       class="btn btn-brown btn-sm mt-1">
+                      View Status</a>
+                  @endif
+                @endif
+              @endauth
             @else
               <div style="font-size:.83rem;color:var(--muted)">No winner declared</div>
             @endif

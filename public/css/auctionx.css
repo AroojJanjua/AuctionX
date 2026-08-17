@@ -11,7 +11,7 @@
   --red:        #C62828;
   --red-bg:     #FFEBEE;
   --red-bd:     #EF9A9A;
-  --text:       #2C1A0E;
+  --text:       #452917;
   --muted:      #7A6050;
   --light-muted:#B09A88;
   --border:     #DDD0C4;
@@ -131,10 +131,24 @@ a:hover{
   border: none;
   font-weight: 700;
   font-family: 'Nunito', sans-serif;
+  transition: all 0.15s;
 }
 .btn-green:hover{ 
     background-color: #1B5E20; color: #fff; 
 }
+
+.btn-red{
+  background-color: var(--red);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.15s;
+}
+.btn-red:hover{ 
+    background-color: #a93333; color: #fff; 
+}
+
 .btn-ghost-ax{
   background: transparent;
   color: var(--muted);

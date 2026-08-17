@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\User;
+use App\Models\Payment;
 use App\Models\Notification;
 use App\Events\AuctionSubmitted;
 use App\Events\AuctionDeleted;
@@ -217,5 +218,25 @@ class SellerController extends Controller
             ->paginate(20);
  
         return view('pages.seller.bids', compact('listing','bids'));
+    }
+
+     // Seller:earnings 
+    public function earnings(){
+        $sellerId=auth()->id();
+ 
+        $payments=Payment::with(['auction','buyer'])
+            ->where('seller_id', $sellerId)
+            ->latest()->paginate(10);
+ 
+        $stats=[
+            'total_earned' => Payment::where('seller_id',$sellerId)
+                ->where('status','released')->sum('seller_amount'),
+            'held' => Payment::where('seller_id', $sellerId)
+                ->whereIn('status',['held','shipped','received'])->sum('seller_amount'),
+            'refunded' => Payment::where('seller_id', $sellerId)
+                ->where('status', 'refunded')->count()
+        ];
+ 
+        return view('pages.seller.earnings',compact('payments','stats'));
     }
 }

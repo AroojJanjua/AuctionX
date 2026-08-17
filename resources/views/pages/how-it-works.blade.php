@@ -4,8 +4,7 @@
 
 <div class="page-header">
   <div class="container">
-    <h2><i class="bi bi-info-circle me-2"></i>How AuctionX Works</h2>
-    <p>Simple, secure and transparent — from registration to winning your item</p>
+    <h2>How AuctionX Works</h2>
   </div>
 </div>
 
@@ -44,24 +43,18 @@
           ['How do I know a bid is valid?',      
           'All bids are recorded instantly and each bidder is notified if they are outbid. The system automatically validates that each bid exceeds the minimum increment.'],
           ['What happens when I win an auction?',
-           'When the auction ends and you are the highest bidder, you will see a "Proceed to Checkout" button on the auction page. Complete the checkout form, choose JazzCash or EasyPaisa, and follow the payment instructions.'],
+           'When the auction ends and you are the highest bidder, you will see a "Pay Now" button on the auction page. Complete the checkout form, choose JazzCash or EasyPaisa, and follow the payment instructions.'],
           ['How does the escrow payment work?',
            'After winning, you send payment to AuctionX\'s JazzCash/EasyPaisa number and submit your Transaction ID. Our admin verifies the payment and holds the funds safely. Once the seller ships and you confirm delivery, the payment is automatically released to the seller.'],
           ['What if my item does not arrive?',
            'If your item has not arrived within the expected delivery period, do NOT confirm delivery. Instead raise a dispute from your Order Status page. Our admin team will investigate and either arrange a refund or resolve the issue with the seller.'],
           ['How do I become a seller?',
-           'During registration, select "Sell items (Seller)" as your role. Once registered, you can access your Seller Dashboard from the navigation menu and create your first listing.'],
+           'During registration, select "Seller" as your role. Once registered, you can access your Seller Dashboard from the navigation menu and create your first listing.'],
           ['How do I list an item for sale?',    
           'Register as a seller, go to your Seller Dashboard and click "New Listing". Fill in your item details, set your pricing and schedule, then publish.'],
           ['Can I cancel a bid after placing it?',
-           'No — bids on AuctionX are binding and cannot be cancelled once placed. Please make sure you intend to purchase the item before bidding.'],
-          ['How do I change my account role from bidder to seller?',
-           'Contact our support team via the contact form below. An admin will update your role within 24 hours.'],
-          ['What is a reserve price?',
-           'A reserve price is a secret minimum price set by the seller. If bidding does not reach this amount, the auction ends without a winner. You can see on each listing whether the reserve price has been "Met" or "Not Met".'],
-          ['How does the reserve price work?',   
-          'If the auction has a reserve price, the item will only sell if bidding reaches that amount. You can see on the listing whether the reserve has been met.'],
-        ] as $i => [$q, $a])
+           'No, bids on AuctionX are binding and cannot be cancelled once placed.'],
+          ] as $i => [$q, $a])
       <div class="accordion-item" 
       style="border:1px solid var(--border);border-radius:10px!important;margin-bottom:8px;overflow:hidden">
         <h2 class="accordion-header">
