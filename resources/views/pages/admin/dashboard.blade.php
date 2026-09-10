@@ -104,7 +104,7 @@
     <div class="col-lg-10">
       <div style="background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden">
         <div class="d-flex justify-content-between align-items-center p-3" style="border-bottom:1px solid var(--border)">
-          <div class="section-title" style="font-size:1rem"><i class="bi bi-hammer me-1"></i>Recent Bids</div>
+          <div class="section-title" style="font-size:1rem">Recent Bids</div>
           <a href="{{ route('admin.bids.index') }}" class="see-all-btn">View all</a>
         </div>
         <table class="table mb-0" style="font-size:.85rem">

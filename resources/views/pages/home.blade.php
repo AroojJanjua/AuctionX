@@ -101,6 +101,37 @@
 </div>
 </section>
 
+<section class="py-4">
+    <div class="container-fluid px-0">
+        <div id="visualSlider" class="carousel slide auction-slider" data-bs-ride="carousel" data-bs-interval="3000">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#visualSlider" data-bs-slide-to="0" 
+                class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#visualSlider" data-bs-slide-to="1" 
+                aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#visualSlider" data-bs-slide-to="2" 
+                aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#visualSlider" data-bs-slide-to="3" 
+                aria-label="Slide 4"></button>
+                <button type="button" data-bs-target="#visualSlider" data-bs-slide-to="4" 
+                aria-label="Slide 5"></button>
+                <button type="button" data-bs-target="#visualSlider" data-bs-slide-to="5" 
+                aria-label="Slide 6"></button>
+            </div>
+
+            <!-- Slides -->
+            <div class="carousel-inner">
+                <div class="carousel-item active"><img src="{{ asset('image/art.jpeg') }}" class="auction-slide-img"  alt="img"></div>
+                <div class="carousel-item"><img src="{{ asset('image/collectible.jpeg') }}" class="auction-slide-img" alt="img"></div>
+                <div class="carousel-item"><img src="{{ asset('image/vehicle.jpeg') }}" class="auction-slide-img" alt="img"></div>
+                <div class="carousel-item"><img src="{{ asset('image/jewelry.jpeg') }}" class="auction-slide-img" alt="img"></div>
+                <div class="carousel-item"><img src="{{ asset('image/watch.jpeg') }}" class="auction-slide-img" alt="img"></div>
+                <div class="carousel-item"><img src="{{ asset('image/electronic.jpeg') }}" class="auction-slide-img" alt="img"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- featured auctions --}}
 <section class="py-5">
     <div class="container">
@@ -221,11 +252,11 @@
       </div>
       <div class="row g-4 mb-5">
      @foreach([
-      ['1','bi-person-plus','Create Your Account','Register as a bidder or seller in minutes. Verify your email and complete your profile to get started.'],
-      ['2','bi-grid',       'Browse Listings',    'Explore thousands of auctions across art, watches, vehicles, jewelry, collectibles and more. Use filters to find exactly what you want.'],
-      ['3','bi-hammer',     'Place Your Bid',     'Enter your bid amount that must be above the current bid. Use auto-bid to let the system bid on your behalf up to your maximum.'],
-      ['4','bi-trophy',     'Win the Auction',    'When the timer ends, the highest bidder wins. You\'ll receive an instant notification with payment instructions.'],
-      ['5','bi-bag-check',  'Secure Checkout',    'Complete your purchase securely using escrow. AuctionX provides buyer protection for every transaction to ensure safety and trust.'],
+      ['1', 'bi-person-plus', 'Create Your Account', 'Sign up as a bidder or seller and create your AuctionX account. Verify your email address and complete your profile to begin.'],
+      ['2', 'bi-grid', 'Browse Listings', 'Discover auctions in categories such as art, watches, vehicles, jewelry, collectibles, and electronics. Browse listings and use filters to find items you are interested in.'],
+      ['3', 'bi-hammer', 'Place Your Bid', 'Choose an auction and enter your bid amount. Your bid must be higher than the current highest bid. You can also use Auto-Bid to automatically place bids for you up to your chosen maximum amount.'],
+      ['4', 'bi-trophy', 'Win the Auction', 'Keep an eye on the auction and place higher bids when needed. When the auction ends, the highest bidder becomes the winner and receives a notification.'],
+      ['5', 'bi-bag-check', 'Complete Secure Payment', 'After winning, complete your payment through AuctionX escrow. The payment is securely held while the order is processed, helping protect both the buyer and seller throughout the transaction.'],
     ] as [$n, $icon, $title, $desc])
     <div class="col-md-6 col-lg-4">
       <div class="step-card">
@@ -239,11 +270,46 @@
   </div>
       <div class="text-center mt-4">
         <a 
-        href="{{ route('register') }}" class="btn btn-brown px-5 py-2">Get Started Free</a>
+        href="{{ route('register') }}" class="btn btn-brown-outline px-5 py-2">Get Started</a>
       </div>
     </div>
   </section>
 @endsection
+
+@push('styles')
+<style>
+.auction-slider .carousel-inner{
+    overflow: hidden;
+}
+.auction-slider .carousel-item img.auction-slide-img{
+    display: block;
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    object-position: center;
+}
+.auction-slider .carousel-indicators [data-bs-target]{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, .5);
+}
+.auction-slider .carousel-indicators [data-bs-target].active{
+    background-color: var(--br);
+    opacity: 1;
+}
+@media (max-width: 992px){
+    .auction-slider .carousel-item img.auction-slide-img{
+        height: 400px;
+    }
+}
+@media (max-width: 576px){
+    .auction-slider .carousel-item img.auction-slide-img{
+        height: 220px;
+    }
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>

@@ -12,11 +12,11 @@
     {{-- Steps --}}
   <div class="row g-4 mb-5">
     @foreach([
-      ['1','bi-person-plus',   'Create Your Account',  'Register as a bidder or seller in minutes. Verify your email and complete your profile to get started.'],
-      ['2','bi-grid',          'Browse Listings',       'Explore thousands of auctions across art, watches, vehicles, jewelry, collectibles and more. Use filters to find exactly what you want.'],
-      ['3','bi-hammer',        'Place Your Bid',        'Enter your bid amount that must be above the current bid. Use auto-bid to let the system bid on your behalf up to your maximum.'],
-      ['4','bi-trophy',        'Win the Auction',       'When the timer ends, the highest bidder wins. You\'ll receive an instant notification with payment instructions.'],
-      ['5','bi-bag-check',     'Secure Checkout',       'Complete your purchase securely using escrow. AuctionX provides buyer protection for every transaction to ensure safety and trust.'],
+      ['1', 'bi-person-plus', 'Create Your Account', 'Sign up as a bidder or seller and create your AuctionX account. Verify your email address and complete your profile to begin.'],
+      ['2', 'bi-grid', 'Browse Listings', 'Discover auctions in categories such as art, watches, vehicles, jewelry, collectibles, and electronics. Browse listings and use filters to find items you are interested in.'],
+      ['3', 'bi-hammer', 'Place Your Bid', 'Choose an auction and enter your bid amount. Your bid must be higher than the current highest bid. You can also use Auto-Bid to automatically place bids for you up to your chosen maximum amount.'],
+      ['4', 'bi-trophy', 'Win the Auction', 'Keep an eye on the auction and place higher bids when needed. When the auction ends, the highest bidder becomes the winner and receives a notification.'],
+      ['5', 'bi-bag-check', 'Complete Secure Payment', 'After winning, complete your payment through AuctionX escrow. The payment is securely held while the order is processed, helping protect both the buyer and seller throughout the transaction.'],
     ] as [$n, $icon, $title, $desc])
     <div class="col-md-6 col-lg-4">
       <div class="step-card">
@@ -79,8 +79,8 @@
     <h3 style="font-size:1.3rem;font-weight:800;color:var(--br)">Ready to start bidding?</h3>
     <p style="color:var(--muted);font-size:0.9rem">Join thousands of bidders and sellers on AuctionX today.</p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="{{ route('register') }}" class="btn btn-brown px-5 py-2">Create Free Account</a>
-      <a class="btn btn-brown-outline px-5 py-2">Browse Auctions</a>
+      <a href="{{ route('register') }}" class="btn btn-brown px-5 py-2">Create Account</a>
+      <a href="{{ route('auctions.index') }}" class="btn btn-brown-outline px-5 py-2">Browse Auctions</a>
     </div>
   </div>
 

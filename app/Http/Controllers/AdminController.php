@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\AutoBid;
 use App\Models\Notification;
 use App\Models\Payment;
+use App\Models\ContactMessage;
 use App\Events\AuctionApproved;
 use App\Events\AuctionStatusChanged;
 use App\Events\AuctionDeleted;
@@ -280,5 +281,15 @@ class AdminController extends Controller
             ->groupBy('category')->get();
 
         return view('pages.admin.reports',compact('topSellers','topBidders','categoryStats'));
+    }
+
+     public function contactMessages(){
+        $messages=ContactMessage::latest()->paginate(15);
+        return view('pages.admin.messages',compact('messages'));
+    }
+ 
+    public function destroyMessage($id){
+        ContactMessage::findOrFail($id)->delete();
+        return back()->with('success','Message deleted.');
     }
 }

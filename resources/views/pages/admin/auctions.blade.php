@@ -74,7 +74,7 @@
                 <form method="POST" action="{{ route('admin.auctions.close', $auction->id) }}">
                   @csrf @method('PUT')
                   <button class="btn btn-sm" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)" title="Close">
-                    <i class="bi bi-x-circle"></i></button>
+                  <i class="bi bi-x-circle"></i></button>
                 </form>
                 @endif
                 @if($auction->bids_count === 0)

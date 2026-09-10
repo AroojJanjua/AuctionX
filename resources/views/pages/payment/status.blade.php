@@ -120,7 +120,7 @@
 
     @if($payment->shipped_at)
     <hr style="border-color:var(--border)">
-    <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem">Shipping Info</div>
+    <div style="font-weight:700;margin-bottom:.5rem">Shipping Info</div>
     <div class="d-flex justify-content-between mb-2" style="font-size:.88rem">
       <span style="color:var(--muted)">Courier</span>
       <span style="font-weight:600">{{ $payment->courier_name }}</span>
@@ -144,6 +144,12 @@
     @endif
     @endif
 
+    @if($payment->shipping_address && (auth()->id() !== $payment->seller_id || in_array($payment->status, ['held','shipped','received','released','disputed'])))
+    <hr style="border-color:var(--border);margin-top:30px">
+    <div style="font-weight:700;margin-bottom:.4rem">Ship To</div>
+    <div style="font-size:.88rem;white-space:pre-line;margin-bottom:30px">{{ $payment->shipping_address }}</div>
+    @endif
+
     @if($payment->admin_note)
     <div style="padding:.10rem;border-radius:8px;font-size:.83rem;color:var(--muted)">
       <strong>Admin note:</strong> {{ $payment->admin_note }}
@@ -158,7 +164,7 @@
 
     @if($payment->proof_image)
     <div style="margin-top:1rem">
-      <div style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem">Payment screenshot:</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem;font-weight:700">Payment screenshot:</div>
       <img src="{{ Storage::url($payment->proof_image) }}" alt="Payment proof"
            style="max-width:100%;border-radius:10px;border:1px solid var(--border);max-height:280px;object-fit:contain">
     </div>
@@ -264,7 +270,7 @@
 
   {{-- dispute --}}
   @if(in_array($payment->status,['held','shipped']) && (auth()->id() === $payment->buyer_id || auth()->id() === $payment->seller_id))
-  <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.5rem">
+  <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-top:30px">
     <div style="font-weight:700;margin-bottom:.4rem">Raise a Dispute</div>
     <div style="font-size:.83rem;color:var(--muted);margin-bottom:1rem">
       if something wrong then raise a dispute and our admin team will investigate within 48 hours.

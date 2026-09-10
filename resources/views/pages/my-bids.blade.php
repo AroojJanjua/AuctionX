@@ -43,13 +43,13 @@
               PKR {{ number_format($bid->auction->current_bid) }}</td>
             <td style="padding:12px 16px;vertical-align:middle">
               @if($bid->auction->status === 'closed' && $bid->auction->winner_id === auth()->id())
-                <span class="badge rounded-pill badge-buynow"><i class="bi bi-trophy me-1"></i>Won</span>
+                <span class="badge rounded-pill badge-timed"><i class="bi bi-trophy me-1"></i>Won</span>
               @elseif($bid->amount == $bid->auction->current_bid && $bid->auction->status === 'active')
                 <span class="badge rounded-pill badge-timed"><i class="bi bi-arrow-up me-1"></i>Leading</span>
               @elseif($bid->auction->status === 'closed')
-                <span class="badge rounded-pill badge-closed2">Ended</span>
+                <span class="badge rounded-pill badge-closed">Ended</span>
               @else
-                <span class="badge rounded-pill" style="background:var(--red-bg);color:var(--red)"><i class="bi bi-arrow-down me-1"></i>Outbid</span>
+                <span class="badge rounded-pill  badge-closed"><i class="bi bi-arrow-down me-1"></i>Outbid</span>
               @endif
             </td>
             <td style="padding:12px 16px;vertical-align:middle;color:var(--muted);font-size:.8rem">

@@ -6,9 +6,7 @@
 <div class="page-header">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div>
-        <h2><i class="bi bi-grid me-2"></i>Browse Auctions</h2>
-      </div>
+      <div><h2>Browse Auctions</h2></div>
       @auth
         @if(auth()->user()->role === 'seller')
           <a href="{{ route('seller.create') }}" class="btn btn-brown px-4">
@@ -115,9 +113,6 @@
           <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.2rem">
             Try different keywords or clear the filters to see all auctions.
           </p>
-          <a href="{{ route('auctions.index') }}" class="btn btn-brown px-4">
-            <i class="bi bi-grid me-2"></i>View All Auctions
-          </a>
         </div>
 
       @else
@@ -199,9 +194,9 @@
           @endforeach
         </div>
               {{-- Pagination --}}
-              <div class="p-3 d-flex justify-content-center">
-      {{ $auctions->withQueryString()->links('vendor.pagination.bootstrap-5') }}
-    </div>
+         <div class="p-3 d-flex justify-content-center">
+         {{ $auctions->withQueryString()->links('vendor.pagination.bootstrap-5') }}
+        </div>
       @endif
       </div>
     </div>

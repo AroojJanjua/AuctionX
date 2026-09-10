@@ -38,13 +38,16 @@ a:hover{
   background: #fff;
   border-bottom: 1px solid var(--border);
 }
-.ax-navbar .navbar-brand{
-  font-size: 1.55rem;
-  font-weight: 800;
-  color: var(--br);
+.navbar-logo-img{
+  height: 50px;
+  width: auto;
+  border-radius: 10px;
 }
-.ax-navbar .navbar-brand span{
-  color: var(--br-light); }
+.logo-img{
+  height: 100px;
+  width: auto;
+  border-radius: 10px;
+}
 .ax-navbar .nav-link{
   color: var(--muted);
   font-weight: 600;
@@ -123,7 +126,10 @@ a:hover{
   transition: all 0.15s;
 }
 .btn-brown-outline:hover{ 
-    background: var(--br-pale); color: var(--br); border-color: var(--br); 
+    background: var(--br-pale); 
+    color: var(--br); 
+    border-color: var(--br); 
+    transform: translateY(-1px);
 }
 .btn-green{
   background-color: var(--green);
@@ -257,7 +263,7 @@ a:hover{
 
 /* Badges */
 .badge-timed{ 
-    background: var(--green-bg); 
+  background: var(--green-bg); 
   color: var(--green); 
   border: 1px solid var(--green-bd);
   font-size: 0.68rem; 

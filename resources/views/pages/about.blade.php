@@ -17,10 +17,10 @@
       <p style="color:var(--muted);line-height:1.8">
         AuctionX connects buyers and sellers in a simple, safe, and fair way. 
         Users can find and bid on special items like art, watches, vehicles, 
-        jewelry, and collectibles all in one place..
+        jewelry, collectibles, and electronics all in one place..
       </p>
       <div class="row g-3 mt-2">
-        @foreach(['50+ Active Listings','50+ Registered Users','$0.1M+ Sold This Week','100% Secure Transactions'] as $stat)
+         @foreach($stats as $stat)
         <div class="col-6">
           <div style="background:var(--br-pale);border:1px solid var(--br-soft);border-radius:10px;padding:.9rem;text-align:center">
             <div style="font-weight:800;font-size:1rem;color:var(--br)">{{ $stat }}</div>
@@ -32,17 +32,17 @@
     {{-- Right Img --}}
     <div class="col-lg-6">
       <div style="background:var(--br-soft);border-radius:16px;height:280px;display:flex;align-items:center;justify-content:center">
-        <img src="{{ asset('images/about.jpeg') }}" style="border-radius:16px;width:445px;height:280px;">
+        <img src="{{ asset('image/about.jpeg') }}" style="border-radius:16px;width:445px;height:280px;">
       </div>
     </div>
 
-    {{-- Values --}}
+     {{-- Values --}}
   <div class="row g-3">
     @foreach([
-      ['bi-shield-check',  'Buyer Protection',  'Every purchase is protected. Verified sellers, secure payments and dispute resolution.'],
-      ['bi-eye',           'Transparency',      'All bids are visible in real-time. No hidden fees, no surprise charges after winning.'],
-      ['bi-lock',          'Secure Platform',   'SSL encryption, verified accounts and fraud detection keep your data and money safe.'],
-      ['bi-headset',       '24/7 Support',      'Our support team is available around the clock to help buyers and sellers with any issue.'],
+      ['bi-shield-check',  'Escrow Protection',   'Payments are held in escrow until you confirm receipt of your item, then released to the seller. Sellers can\'t be paid before delivery.'],
+      ['bi-broadcast',     'Real-Time Bidding',    'Experience live auctions with instant bid updates, dynamic pricing, and synchronized countdowns.'],
+      ['bi-lock',          'Secure Payments',      'Transparent payments through JazzCash or EasyPaisa with payment verification, clear pricing and a simple payment process.'],
+      ['bi-headset',       'Dispute Resolution',   'Shop with confidence. If an issue arises after delivery, our support team carefully reviews the case and works with both buyers and sellers to reach a fair resolution.'],
     ] as [$icon, $title, $desc])
     <div class="col-sm-6 col-lg-3">
       <div class="step-card text-center">

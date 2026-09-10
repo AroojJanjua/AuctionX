@@ -33,29 +33,20 @@
         <div class="form-section">
           <div class="form-section-title">
             <i class="bi bi-card-text me-2"></i>Basic Information
-          </div>
+        </div>
 
         <div class="mb-3">
             <label class="form-label-ax" for="title">Item Title</label>
-            <input type="text" id="title" name="title"
-                   class="form-control-ax"
-                   value="{{ old('title') }}"
-                   placeholder="enter title for item"
-                   required />
-            @error('title')
-              <div class="field-error">{{ $message }}</div>
-            @enderror
+            <input type="text" id="title" name="title" class="form-control-ax"
+            value="{{ old('title') }}" placeholder="enter title for item" required />
+            @error('title')<div class="field-error">{{ $message }}</div>@enderror
           </div>
 
           <div class="mb-3">
             <label class="form-label-ax" for="description">Description </label>
-            <textarea id="description" name="description" rows="5"
-                      class="form-control-ax"
-                      placeholder="enter brief discription about item"
-                      required>{{ old('description') }}</textarea>
-            @error('description')
-              <div class="field-error">{{ $message }}</div>
-            @enderror
+            <textarea id="description" name="description" rows="5" class="form-control-ax"
+            placeholder="enter brief discription about item" required>{{ old('description') }}</textarea>
+            @error('description')<div class="field-error">{{ $message }}</div>@enderror
           </div>
 
           <div class="row g-3">
@@ -129,23 +120,15 @@
           <div class="row g-3">
             <div class="col-sm-6">
               <label class="form-label-ax" for="starts_at">Start Date & Time</label>
-              <input type="datetime-local" id="starts_at" name="starts_at"
-                     class="form-control-ax"
-                     value="{{ old('starts_at') }}"
-                     required />
-              @error('starts_at') 
-              <div class="field-error">{{ $message }}</div> 
-              @enderror
+              <input type="datetime-local" id="starts_at" name="starts_at" class="form-control-ax"
+              value="{{ old('starts_at') }}" required />
+              @error('starts_at')<div class="field-error">{{ $message }}</div>@enderror
             </div>
             <div class="col-sm-6">
               <label class="form-label-ax" for="ends_at">End Date & Time</label>
-              <input type="datetime-local" id="ends_at" name="ends_at"
-                     class="form-control-ax"
-                     value="{{ old('ends_at') }}"
-                     required />
-              @error('ends_at') 
-              <div class="field-error">{{ $message }}</div> 
-              @enderror
+              <input type="datetime-local" id="ends_at" name="ends_at" class="form-control-ax"
+              value="{{ old('ends_at') }}" required />
+              @error('ends_at')<div class="field-error">{{ $message }}</div>@enderror
             </div>
           </div>
           
@@ -153,33 +136,24 @@
               <label class="form-label-ax" for="starting_bid">Starting Bid</label>
               <div style="position:relative">
                 <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);
-                             color:var(--muted);font-size:.82rem;font-weight:600">pkr</span>
-                <input type="number" id="starting_bid" name="starting_bid"
-                       class="form-control-ax" style="padding-left:48px"
-                       value="{{ old('starting_bid') }}" placeholder="0"
-                       min="1" step="1" required />
+                color:var(--muted);font-size:.82rem;font-weight:600">pkr</span>
+                <input type="number" id="starting_bid" name="starting_bid" class="form-control-ax" style="padding-left:48px"
+                value="{{ old('starting_bid') }}" placeholder="0" min="1" step="1" required />
               </div>
-              <div style="font-size:.75rem;color:var(--muted);margin-top:4px">
-                This is the minimum bid buyers must start from.</div>
-              @error('starting_bid') 
-              <div class="field-error">{{ $message }}</div> 
-              @enderror
-            </div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:4px">This is the minimum bid buyers must start from.</div>
+          @error('starting_bid') <div class="field-error">{{ $message }}</div>@enderror
         </div>
+      </div>
 
-        {{-- Submit Button  --}}
         <div class="d-flex gap-3 flex-wrap align-items-center justify-content-center">
-          <button type="submit" class="btn btn-brown btn-lg px-5">
-            Submit</button>
-          <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost-ax btn-lg px-5">
-            Cancel</a>
+          <button type="submit" class="btn btn-brown btn-lg px-5">Submit</button>
+          <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost-ax btn-lg px-5">Cancel</a>
           <div style="font-size:.78rem;color:var(--muted)">
             <i class="bi bi-shield-check me-1" style="color:var(--green)"></i>
             Listing will go to admin for review before going live.
-          </div>
-        </div>
-
+          </div></div>
         </form>
+        
       </div>
     </div>
   </div>

@@ -196,12 +196,12 @@
                 </div>
               </div>
               @if($auction->snipe_extension_count > 0)
-          <div style="margin-top:.7rem;font-size:.78rem;color:var(--red);font-weight:700;text-align:center">
+            <div style="margin-top:.7rem;font-size:.78rem;color:var(--red);font-weight:700;text-align:center">
             <i class="bi bi-shield-exclamation me-1"></i>
             Anti-sniping active <br> timer extended {{ $auction->snipe_extension_count }} {{ Str::plural('time',$auction->snipe_extension_count) }}
           </div>
-        @endif
-            </div>
+          @endif
+          </div>
         </div>
 
         {{-- Smart bid suggestion card  --}}
@@ -259,7 +259,13 @@
         {{-- Bid form — manual bid + auto-bid option --}}
       @if($auction->status === 'active' && $auction->starts_at->isPast() && $auction->ends_at->isFuture())
           @auth
-          @if(auth()->user()->id !== $auction->seller_id)
+           @if(auth()->user()->role === 'admin')
+              <div style="background:var(--br-pale);border:1px solid var(--br-soft);
+                          border-radius:12px;padding:1rem;text-align:center;margin-bottom:1rem">
+                <i class="bi bi-info-circle me-1" style="color:var(--br)"></i>
+                <span style="font-size:.85rem;color:var(--muted)">Admin accounts cannot place bids.</span>
+              </div>
+          @elseif(auth()->user()->id !== $auction->seller_id)
           <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.4rem;margin-bottom:1rem">
                 <form method="POST" action="{{ route('auctions.bid', $auction->id) }}" id="bidForm" novalidate>
                 @csrf

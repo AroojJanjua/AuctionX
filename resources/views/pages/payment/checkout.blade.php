@@ -65,32 +65,23 @@
             </div>
           </div>
         </div>
-        @error('payment_method')
-          <div style="font-size:.78rem;color:var(--red);margin-top:6px">{{ $message }}</div>
-        @enderror
+        @error('payment_method')<div style="font-size:.78rem;color:var(--red);margin-top:6px">{{ $message }}</div>@enderror
       </div>
 
       <div class="mb-3">
         <label class="form-label-ax" for="transaction_id">Transaction ID</label>
         <input type="text" id="transaction_id" name="transaction_id"
-          class="form-control-ax @error('transaction_id') is-invalid @enderror"
-          placeholder="TX1*********"
-          value="{{ old('transaction_id') }}" required>
+          class="form-control-ax" placeholder="TX1*********" value="{{ old('transaction_id') }}" required>
         <div style="font-size:.75rem;color:var(--muted);margin-top:3px">
-          Found in your JazzCash/EasyPaisa SMS or app receipt
-        </div>
-        @error('transaction_id')
-          <div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>
-        @enderror
+          Found in your JazzCash/EasyPaisa SMS or app receipt</div>
+        @error('transaction_id')<div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>@enderror
       </div>
 
       <div class="mb-3">
         <label class="form-label-ax">Payment Screenshot</label>
-        <div id="drop-zone"
-          style="border:2px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;
-          cursor:pointer;transition:border-color .2s"
-          onclick="document.getElementById('proof_image').click()">
-
+        <div id="drop-zone" style="border:2px dashed var(--border);border-radius:10px;padding:1.5rem;
+        text-align:center;cursor:pointer;transition:border-color .2s"
+        onclick="document.getElementById('proof_image').click()">
           <i class="bi bi-cloud-upload" style="font-size:1.8rem;color:var(--muted);display:block;margin-bottom:.4rem"></i>
           <div id="drop-text" style="font-size:.85rem;color:var(--muted)">Upload your screenshot here</div>
           <img id="preview" src="" alt="" style="display:none;max-width:100%;border-radius:8px;margin-top:.8rem;max-height:auto">
@@ -98,9 +89,19 @@
 
         <input type="file" id="proof_image" name="proof_image" accept="image/jpeg,image/png" style="display:none"
         onchange="previewImage(this)" required>
-        @error('proof_image')
-          <div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>
-        @enderror
+        @error('proof_image')<div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>@enderror
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label-ax" for="shipping_address">Shipping Address</label>
+        <textarea id="shipping_address" name="shipping_address" rows="3"
+          class="form-control-ax"
+          style="resize:none" placeholder="Enter house no., street, area, city, and postal code" 
+          required>{{ old('shipping_address', auth()->user()->address ? trim(auth()->user()->address . ', ' . auth()->user()->city . ', ' . auth()->user()->country, ', ') : '') }}</textarea>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:3px">
+          The seller will only see this once your payment is confirmed
+        </div>
+        @error('shipping_address')<div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>@enderror
       </div>
 
       <div class="mb-4">
@@ -170,12 +171,16 @@ function previewImage(input){
   }
 
 function checkSubmit(){
-  var ok=selectedMethod !== '' && document.getElementById('transaction_id').value.trim() !== '' &&
-      document.getElementById('proof_image').files.length > 0;
+  var ok=selectedMethod !== '' &&
+      document.getElementById('transaction_id').value.trim() !== '' &&
+      document.getElementById('proof_image').files.length > 0 && 
+      document.getElementById('shipping_address').value.trim() !== '';
       document.getElementById('submit-btn').disabled=!ok;
 }
 
 document.getElementById('transaction_id').addEventListener('input',checkSubmit);
+document.getElementById('shipping_address').addEventListener('input',checkSubmit);
+
 </script>
 @endpush
 @endsection

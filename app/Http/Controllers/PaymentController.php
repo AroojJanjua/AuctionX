@@ -52,6 +52,7 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:jazzcash,easypaisa',
             'transaction_id' => 'required|string|max:100',
             'proof_image'    => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'shipping_address' => 'required|string|max:500',
             'buyer_note'     => 'nullable|string|max:500',
         ]);
 
@@ -61,14 +62,15 @@ class PaymentController extends Controller
             'payment_method' => $request->payment_method,
             'transaction_id' => $request->transaction_id,
             'proof_image'    => $request->file('proof_image')->store('payment-proofs','public'),
+            'shipping_address' => $request->shipping_address,
             'buyer_note'     => $request->buyer_note,
             'status'         => 'submitted',
             'submitted_at'   => now(),
         ]);
 
         $payment->load('buyer');
-        $admin=User::where('role','admin')->first();
-        if($admin){
+        $admins=User::where('role','admin')->get();
+        foreach($admins as $admin){
             Notification::send(
                 $admin->id,
                 'payment_held',
@@ -152,33 +154,22 @@ class PaymentController extends Controller
         return back()->with('success', 'Item marked as shipped. Buyer has been notified.');
     }
 
-    // ── Buyer: confirm receipt → auto-release ─────────────────
-
-    public function confirmReceipt(Payment $payment)
-    {
+    //Buyer: confirm receipt do auto-release
+    public function confirmReceipt(Payment $payment){
         if (auth()->id() !== $payment->buyer_id) abort(403);
 
-        if (!$payment->isShipped()) {
-            return back()->with('error', 'Cannot confirm receipt before seller marks item as shipped.');
+        if (!$payment->isShipped()){
+            return back()->with('error','Cannot confirm receipt before seller marks item as shipped.');
         }
 
         $payment->update([
-            'status'      => 'released',
+            'status'      => 'received',
             'received_at' => now(),
-            'released_at' => now(),
             'admin_note'  => 'Auto-released after buyer confirmed receipt.',
         ]);
 
-        Notification::send(
-            $payment->seller_id,
-            'payment_released',
-            'Payment released to you! 🎉',
-            'The buyer confirmed receipt of "' . $payment->auction->title . '". PKR ' . number_format($payment->seller_amount) . ' will be transferred to your account.',
-            $payment->auction_id
-        );
-
-        $admin = User::where('role', 'admin')->first();
-        if ($admin) {
+        $admin=User::where('role', 'admin')->first();
+        if($admin){
             Notification::send(
                 $admin->id,
                 'payment_released',
@@ -203,15 +194,8 @@ class PaymentController extends Controller
         $role=$payment->roleOf($userId);
         if(!$role) 
             abort(403);
- 
-        // if(!in_array($payment->status,['held', 'submitted', 'shipped', 'disputed'])) {
-        //     return back()->with('error','This payment can no longer be disputed.');
-        // }
- 
+        
         $evidencePath=$request->hasFile('evidence')?$request->file('evidence')->store('disputes', 'public'):null;
- 
-        // Each party writes only to their own dedicated slot — a buyer can never
-        // end up in the seller_statement column or vice versa, by construction.
         $updates=$role==='buyer'?
             [
                 'buyer_statement'          => $request->statement,
@@ -226,8 +210,6 @@ class PaymentController extends Controller
         $isFirstStatement=!$payment->isDisputed();
         if($isFirstStatement){
             $updates['status']='disputed';
-            $updates['dispute_raised_by']=$userId;
-            $updates['dispute_raised_at']=now();
         }
  
         $payment->update($updates);

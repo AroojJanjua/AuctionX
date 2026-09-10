@@ -45,4 +45,8 @@ return [
         'account_name'   => env('EASYPAISA_ACCOUNT_NAME'),
     ],
 
+    'scheduler' => [
+        'key' => env('SCHEDULER_KEY'),
+    ],
+
 ];

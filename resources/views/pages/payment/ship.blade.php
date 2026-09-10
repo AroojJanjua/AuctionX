@@ -28,7 +28,11 @@
       <span style="color:var(--muted)">You'll receive</span>
       <span style="font-weight:700;color:var(--text)">PKR {{ number_format($payment->seller_amount) }}</span>
     </div>
-    <div class="d-flex justify-content-between" style="font-size:.9rem">
+    <div class="d-flex justify-content-between mb-2" style="font-size:.9rem">
+      <span style="color:var(--muted)">Ship to</span>
+      <span style="font-weight:500">{{ $payment->shipping_address }}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2" style="font-size:.9rem">
       <span style="color:var(--muted)">Payment confirmed</span>
       <span>{{ $payment->paid_at?->format('M d, Y') }}</span>
     </div>
@@ -46,12 +50,9 @@
       <div class="mb-3">
         <label class="form-label-ax" for="courier_name">Courier / Shipping Service</label>
         <input type="text" id="courier_name" name="courier_name"
-          class="form-control-ax @error('courier_name') is-invalid @enderror"
-          placeholder="enter service name like Leopards"
+          class="form-control-ax" placeholder="enter service name like Leopards"
           value="{{ old('courier_name') }}" required autofocus>
-        @error('courier_name')
-          <div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>
-        @enderror
+        @error('courier_name')<div style="font-size:.78rem;color:var(--red);margin-top:4px">{{ $message }}</div>@enderror
       </div>
 
       <div class="mb-3">
@@ -69,8 +70,7 @@
       </div>
 
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-brown w-50">Mark as Shipped
-        </button>
+        <button type="submit" class="btn btn-brown w-50">Mark as Shipped</button>
         <a href="{{ route('payment.status', $payment->auction_id) }}" class="btn btn-ghost-ax w-50">Cancel</a>
       </div>
     </form>

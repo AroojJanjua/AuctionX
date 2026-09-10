@@ -72,10 +72,6 @@ class Auction extends Model
         return now()->diffInMinutes($this->ends_at, false) <= 60;
     }
 
-    public function getNotStartedAttribute():bool{
-        return $this->starts_at->isFuture();
-    }
-
     public function getCategoryLabelAttribute():string{
         return match ($this->category){
             'art'          => 'Art',

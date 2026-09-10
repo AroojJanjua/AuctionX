@@ -36,7 +36,7 @@
     <div class="col-sm-4">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.1rem">
         <div style="font-size:.78rem;color:var(--muted);margin-bottom:3px">Refunded Orders</div>
-        <div style="font-size:1.5rem;font-weight:800;color:var(--red)">{{ $stats['refunded'] }}</div>
+        <div style="font-size:1.5rem;font-weight:800;color:var(--red);margin-bottom:17px">{{ $stats['refunded'] }}</div>
       </div>
     </div>
   </div>

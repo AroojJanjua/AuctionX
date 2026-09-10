@@ -37,7 +37,6 @@
         </div>
  
       @else
-
       <form method="POST" action="{{ route('seller.update', $listing->id) }}"
             enctype="multipart/form-data">
         @csrf 
@@ -50,25 +49,17 @@
  
           <div class="mb-3">
             <label class="form-label-ax" for="title">Item Title</label>
-            <input type="text" id="title" name="title"
-                   class="form-control-ax"
-                   value="{{ old('title', $listing->title) }}"
-                   placeholder="enter title for item"
-                   required />
-            @error('title')
-              <div class="field-error">{{ $message }}</div>
-            @enderror
+            <input type="text" id="title" name="title" class="form-control-ax"
+            value="{{ old('title', $listing->title) }}" placeholder="enter title for item" required />
+            @error('title')<div class="field-error">{{ $message }}</div>@enderror
           </div>
  
           <div class="mb-3">
             <label class="form-label-ax" for="description">Description</label>
-            <textarea id="description" name="description" rows="5"
-                      class="form-control-ax"
-                      placeholder="enter brief description about item"
+            <textarea id="description" name="description" rows="5" class="form-control-ax"
+                      placeholder="enter brief description about item" 
                       required>{{ old('description', $listing->description) }}</textarea>
-            @error('description')
-              <div class="field-error">{{ $message }}</div>
-            @enderror
+            @error('description')<div class="field-error">{{ $message }}</div>@enderror
           </div>
  
           <div class="row g-3">
@@ -117,23 +108,21 @@
           @if($listing->image)
             <div class="mb-3">
               <img src="{{ asset('storage/'.$listing->image) }}" alt="Current image"
-                   style="height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--border)">
+              style="height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--border)">
               <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Current image — upload a new one to replace it</div>
             </div>
           @endif
           <label for="image" id="dropZone"
-            style="display:block;border:2px dashed var(--border);border-radius:12px;
-                   padding:2.5rem;text-align:center;cursor:pointer;
-                   background:var(--surface);transition:border-color .15s"
-            onmouseover="this.style.borderColor='var(--br)'"
-            onmouseout="this.style.borderColor='var(--border)'">
+            style="display:block;border:2px dashed var(--border);border-radius:12px;padding:2.5rem;text-align:center;
+            cursor:pointer;background:var(--surface);transition:border-color .15s"
+            onmouseover="this.style.borderColor='var(--br)'" onmouseout="this.style.borderColor='var(--border)'">
             <i class="bi bi-cloud-upload" style="font-size:2.5rem;color:var(--muted)"></i>
             <div style="font-weight:700;color:var(--text);margin-top:.5rem">Click to upload new image</div>
             <div id="fileName" style="font-size:.82rem;color:var(--br);margin-top:8px;font-weight:600"></div>
           </label>
           <input type="file" id="image" name="image" accept="image/*" class="d-none"
-                 onchange="document.getElementById('fileName').textContent = this.files[0]?.name || ''" />
-          @error('image') <div class="field-error mt-1">{{ $message }}</div> @enderror
+          onchange="document.getElementById('fileName').textContent = this.files[0]?.name || ''" />
+          @error('image')<div class="field-error mt-1">{{ $message }}</div> @enderror
         </div>
  
         {{-- Schedule & Pricing --}}
@@ -143,7 +132,7 @@
           </div>
  
           <div style="background:var(--br-pale);border:1px solid var(--br-soft);
-                      border-radius:10px;padding:1rem;margin-bottom:1rem">
+          border-radius:10px;padding:1rem;margin-bottom:1rem">
             <div style="font-size:.8rem;color:var(--br);font-weight:700;margin-bottom:.6rem">Edit Rules</div>
             <div style="font-size:.78rem;color:var(--muted);line-height:1.7">
               • Start time is <strong>locked</strong> and cannot be changed<br>
@@ -157,20 +146,15 @@
             <div class="col-sm-6">
               <label class="form-label-ax">Start Date & Time</label>
               <input type="text" class="form-control-ax"
-                     value="{{ $listing->starts_at->format('d M Y, h:i A') }}" disabled />
+              value="{{ $listing->starts_at->format('d M Y, h:i A') }}" disabled />
               <div style="font-size:.75rem;color:var(--muted);margin-top:4px">
-                <i class="bi bi-lock me-1"></i>Locked after creation
-              </div>
+                <i class="bi bi-lock me-1"></i>Locked after creation</div>
             </div>
             <div class="col-sm-6">
               <label class="form-label-ax" for="ends_at">End Date & Time</label>
-              <input type="datetime-local" id="ends_at" name="ends_at"
-                     class="form-control-ax"
-                     value="{{ old('ends_at', $listing->ends_at->format('Y-m-d\TH:i')) }}"
-                     required />
-              @error('ends_at')
-                <div class="field-error">{{ $message }}</div>
-              @enderror
+              <input type="datetime-local" id="ends_at" name="ends_at" class="form-control-ax"
+              value="{{ old('ends_at', $listing->ends_at->format('Y-m-d\TH:i')) }}" required />
+              @error('ends_at')<div class="field-error">{{ $message }}</div>@enderror
             </div>
           </div>
  
@@ -178,26 +162,21 @@
             <label class="form-label-ax" for="starting_bid">Starting Bid</label>
             <div style="position:relative">
               <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);
-                           color:var(--muted);font-size:.82rem;font-weight:600">pkr</span>
-              <input type="number" id="starting_bid" name="starting_bid"
-                     class="form-control-ax" style="padding-left:48px"
-                     value="{{ old('starting_bid', (int)$listing->starting_bid) }}"
-                     placeholder="0" min="1" step="1" required />
+              color:var(--muted);font-size:.82rem;font-weight:600">pkr</span>
+              <input type="number" id="starting_bid" name="starting_bid" class="form-control-ax" 
+              style="padding-left:48px" value="{{ old('starting_bid', (int)$listing->starting_bid) }}"
+              placeholder="0" min="1" step="1" required />
             </div>
             <div style="font-size:.75rem;color:var(--muted);margin-top:4px">
               Changing the price will reset the current bid to match.</div>
-            @error('starting_bid')
-              <div class="field-error">{{ $message }}</div>
-            @enderror
+            @error('starting_bid')<div class="field-error">{{ $message }}</div>@enderror
           </div>
         </div>
  
         {{-- Submit --}}
         <div class="d-flex gap-3 flex-wrap align-items-center justify-content-center">
           <button type="submit" class="btn btn-brown btn-lg px-5">Save</button>
-          <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost-ax btn-lg px-5">
-            Cancel
-          </a>
+          <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost-ax btn-lg px-5">Cancel</a>
         </div>
 
       </form>

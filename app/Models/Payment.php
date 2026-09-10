@@ -10,7 +10,7 @@ class Payment extends Model
         'auction_id', 'buyer_id', 'seller_id',
         'amount', 'platform_fee', 'seller_amount',
         'payment_method', 'transaction_id', 'proof_image',
-        'status', 'courier_name', 'tracking_number',
+        'status', 'courier_name', 'tracking_number', 'shipping_address',
         'buyer_note', 'seller_note', 'admin_note',
         'dispute_raised_by', 'dispute_raised_at',
         'buyer_statement', 'buyer_statement_evidence', 'buyer_statement_at',
@@ -60,9 +60,6 @@ class Payment extends Model
     }
     public function isShipped():bool{ 
         return $this->status === 'shipped'; 
-    }
-    public function isReceived():bool{ 
-        return $this->status === 'received'; 
     }
     public function isReleased():bool{ 
         return $this->status === 'released'; 

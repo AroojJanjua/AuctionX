@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone')->nullable();
             $table->enum('role', ['bidder', 'seller', 'admin'])->default('bidder');
-            $table->string('avatar')->nullable();
             $table->text('bio')->nullable();
             $table->string('address')->nullable();
             $table->string('city')->nullable();
@@ -25,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'phone', 'role', 'avatar', 'bio',
+                'phone', 'role', 'bio',
                 'address', 'city', 'country',
                 'is_banned', 'email_verified',
             ]);

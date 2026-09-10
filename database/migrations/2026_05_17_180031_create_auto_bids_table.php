@@ -15,8 +15,6 @@ return new class extends Migration
             $table->foreignId('bidder_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('max_amount');
             $table->timestamps();
-
-            // One active limit per user per auction
             $table->unique(['auction_id', 'bidder_id']);
         });
     }

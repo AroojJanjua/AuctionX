@@ -9,9 +9,7 @@
         <h2><i class="bi bi-person-circle me-2"></i>My Profile</h2>
         <p>Manage your account information</p>
       </div>
-      <a href="{{ route('profile.edit') }}" class="btn btn-brown px-4">
-        <i class="bi bi-pencil me-2"></i>Edit Profile
-      </a>
+      <a href="{{ route('profile.edit') }}" class="btn btn-brown px-4">Edit Profile</a>
     </div>
   </div>
 </div>
@@ -42,8 +40,7 @@
           @foreach([
             ['bi-telephone',$user->phone ?? 'Not set'],
             ['bi-geo-alt',($user->city && $user->country)
-                          ? $user->city . ', ' . $user->country
-                          : ($user->city ?? $user->country ?? 'Not set')]
+             ? $user->city . ', ' . $user->country : ($user->city ?? $user->country ?? 'Not set')]
             ] as [$icon,$val])
           <div class="d-flex align-items-center gap-2 mb-2" style="font-size:.83rem;color:var(--muted)">
             <i class="bi {{ $icon }}" style="color:var(--br)"></i> {{ $val }}
@@ -70,6 +67,7 @@
       </div>
 
       {{-- Recent Bids  --}}
+      @if(in_array($user->role,['bidder']))
       <div class="col-lg-8">
       <div style="background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden">
         <div class="d-flex justify-content-between align-items-center p-3" style="border-bottom:1px solid var(--border)">
@@ -89,6 +87,7 @@
         @endforelse
         </div>
       </div>
+      @endif
   </div>
 </div>
 
