@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('payments',function(Blueprint $table){
             if(!Schema::hasColumn('payments','buyer_statement')){
-                $table->text('buyer_statement')->nullable()->after('dispute_raised_at');
+                $table->text('buyer_statement')->nullable()->after('admin_note');
                 $table->string('buyer_statement_evidence')->nullable()->after('buyer_statement');
                 $table->timestamp('buyer_statement_at')->nullable()->after('buyer_statement_evidence');
             }

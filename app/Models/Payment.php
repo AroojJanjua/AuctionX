@@ -12,7 +12,6 @@ class Payment extends Model
         'payment_method', 'transaction_id', 'proof_image',
         'status', 'courier_name', 'tracking_number', 'shipping_address',
         'buyer_note', 'seller_note', 'admin_note',
-        'dispute_raised_by', 'dispute_raised_at',
         'buyer_statement', 'buyer_statement_evidence', 'buyer_statement_at',
         'seller_statement', 'seller_statement_evidence', 'seller_statement_at',
         'submitted_at', 'paid_at', 'shipped_at',
