@@ -49,4 +49,8 @@ return [
         'key' => env('SCHEDULER_KEY'),
     ],
 
+     'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+    ],
+
 ];
