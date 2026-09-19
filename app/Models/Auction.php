@@ -98,7 +98,7 @@ class Auction extends Model
     public function getDurationAttribute():string{
         $hours=$this->starts_at->diffInHours($this->ends_at);
         if($hours >= 24){
-            $days = round($hours /24, 1);
+            $days = round($hours /24);
             return $days.' '.($days == 1?'day':'days');
         }
         return $hours.' '.($hours == 1?'hour':'hours');

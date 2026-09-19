@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Notifications — AuctionX')
+@section('title','Notifications')
 @section('content')
 
 <div class="page-header">

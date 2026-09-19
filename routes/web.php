@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\ProfileController;
@@ -55,15 +56,11 @@ Route::get('/profile',         [ProfileController::class, 'show'])->name('profil
 Route::get('/profile/edit',    [ProfileController::class, 'edit'])->name('profile.edit');
 Route::put('/profile',         [ProfileController::class, 'update'])->name('profile.update');
 Route::put('/profile/password',[ProfileController::class, 'updatePassword'])->name('profile.password');
-
-// Payments
-Route::get('/payment/{auction}/checkout',        [PaymentController::class, 'checkout'])->name('payment.checkout');
-Route::post('/payment/{auction}/submit',         [PaymentController::class, 'submit'])->name('payment.submit');
-Route::get('/payment/{auction}/status',          [PaymentController::class, 'status'])->name('payment.status');
-Route::get('/payment/{payment}/ship',            [PaymentController::class, 'shipForm'])->name('payment.ship.form');
-Route::post('/payment/{payment}/ship',           [PaymentController::class, 'ship'])->name('payment.ship');
-Route::post('/payment/{payment}/confirm-receipt',[PaymentController::class, 'confirmReceipt'])->name('payment.confirm-receipt');
-Route::post('/payment/{payment}/dispute',        [PaymentController::class, 'dispute'])->name('payment.dispute');
+ 
+// Email Verification 
+Route::get('/email/verify',                    [VerificationController::class, 'notice'])->name('verification.notice');
+Route::post('/email/verify',                   [VerificationController::class, 'verify'])->middleware('throttle:10,1')->name('verification.verify');
+Route::post('/email/verification-notification',[VerificationController::class, 'resend'])->middleware('throttle:6,1')->name('verification.send');
  
 // Notifications
 Route::get('/notifications',           [NotificationController::class, 'index'])->name('notifications.index');
@@ -73,12 +70,23 @@ Route::post('/notifications/{id}/read',[NotificationController::class, 'markRead
 Route::delete('/notifications/{id}',   [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
-Route::middleware(['auth','role:bidder,seller'])->group(function(){
+// Payments
+Route::middleware(['auth','verified'])->group(function(){
+Route::get('/payment/{auction}/checkout',        [PaymentController::class, 'checkout'])->name('payment.checkout');
+Route::post('/payment/{auction}/submit',         [PaymentController::class, 'submit'])->name('payment.submit');
+Route::get('/payment/{auction}/status',          [PaymentController::class, 'status'])->name('payment.status');
+Route::get('/payment/{payment}/ship',            [PaymentController::class, 'shipForm'])->name('payment.ship.form');
+Route::post('/payment/{payment}/ship',           [PaymentController::class, 'ship'])->name('payment.ship');
+Route::post('/payment/{payment}/confirm-receipt',[PaymentController::class, 'confirmReceipt'])->name('payment.confirm-receipt');
+Route::post('/payment/{payment}/dispute',        [PaymentController::class, 'dispute'])->name('payment.dispute');
+ });
+
+Route::middleware(['auth','verified','role:bidder'])->group(function(){
 Route::get('/my-bids',                [BidController::class, 'myBids'])->name('my-bids');
 Route::post('/auctions/{auction}/bid',[BidController::class, 'store'])->name('auctions.bid');
 });
 
-Route::middleware(['auth','role:seller'])->prefix('seller')->name('seller.')->group(function(){
+Route::middleware(['auth','verified','role:seller'])->prefix('seller')->name('seller.')->group(function(){
 Route::get('/',         [SellerController::class, 'dashboard'])->name('dashboard');
 Route::get('/create',   [SellerController::class, 'create'])->name('create');
 Route::post('/',        [SellerController::class, 'store'])->name('store');

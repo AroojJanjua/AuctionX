@@ -5,7 +5,6 @@
 <div class="page-header">
   <div class="container">
     <h2>Admin Dashboard</h2>
-    <p>Overview — {{ now()->format('l, M d Y') }}</p>
   </div>
 </div>
 

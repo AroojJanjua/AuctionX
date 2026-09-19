@@ -574,3 +574,17 @@ a:hover{
   font-size: 0.9rem; 
   margin: 0; 
 }
+
+/* notification dropdown for mob */
+@media(max-width: 767.98px){
+    .notif-wrapper{
+        position: static;
+    }
+}
+
+/* profile dropdown for mob */
+@media (max-width: 767.98px){
+    .profile-wrapper{
+        position: static;
+    }
+}

@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use App\Notifications\VerifyEmailOtp;
 
 class User extends Authenticatable
 {
@@ -19,14 +21,15 @@ class User extends Authenticatable
     ];
 
     protected $hidden=[
-        'password','remember_token',
+        'password','remember_token','email_verification_code',
     ];
 
    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'is_banned'         => 'boolean',
-        'email_verified'    => 'boolean',
-        'password'          => 'hashed',
+        'email_verified_at'             => 'datetime',
+        'email_verification_expires_at' => 'datetime',
+        'is_banned'                     => 'boolean',
+        'email_verified'                => 'boolean',
+        'password'                      => 'hashed',
     ];
 
     // Relationships
@@ -52,5 +55,40 @@ class User extends Authenticatable
     }
     public function hasPayoutDetails():bool{
         return !empty($this->payout_method) && !empty($this->payout_account_number);
+    }
+
+    public function sendEmailVerificationNotification(): void{
+        $code=(string) random_int(1000, 9999);
+
+        $this->forceFill([
+            'email_verification_code' => Hash::make($code),
+            'email_verification_expires_at' => now()->addMinutes(10),
+        ])->save();
+        $this->notify(new VerifyEmailOtp($code));
+    }
+
+    public function checkEmailVerificationCode(string $code): bool{
+        if(! $this->email_verification_code || ! $this->email_verification_expires_at){
+            return false;
+        }
+ 
+        if(now()->greaterThan($this->email_verification_expires_at)){
+            return false;
+        }
+        return Hash::check($code, $this->email_verification_code);
+    }
+ 
+    public function markEmailAsVerified(): bool{
+        $result=$this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+            'email_verified' => true,
+            'email_verification_code' => null,
+            'email_verification_expires_at' => null,
+        ])->save();
+ 
+        if($result){
+            event(new \Illuminate\Auth\Events\Verified($this));
+        }
+        return $result;
     }
 }

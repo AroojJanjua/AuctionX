@@ -22,6 +22,10 @@ return [
         'key' => env('RESEND_API_KEY'),
     ],
 
+    'mailtrap' => [
+        'api_key' => env('MAILTRAP_API_KEY'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
@@ -48,5 +52,5 @@ return [
     'scheduler' => [
         'key' => env('SCHEDULER_KEY'),
     ],
-
+    
 ];

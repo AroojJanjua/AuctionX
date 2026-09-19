@@ -67,7 +67,7 @@
       @else
         {{-- Notification Bell --}}
         @auth
-        <div class="dropdown" id="notifDropdown">
+        <div class="dropdown notif-wrapper" id="notifDropdown">
           <button
             class="btn btn-ghost-ax btn-sm px-2 position-relative"
             id="notifBell" data-bs-toggle="dropdown" data-bs-auto-close="outside"
@@ -102,8 +102,8 @@
 
         @endauth
         {{-- User Dropdown --}}
-        <div class="dropdown">
-          <button class="btn btn-ghost-ax btn-sm px-3 dropdown-toggle" data-bs-toggle="dropdown">
+        <div class="dropdown profile-wrapper">
+          <button class="btn btn-ghost-ax btn-sm px-3 dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true">
             <i class="bi bi-person-circle me-1"></i>
             {{ auth()->user()->name }}</button>
 
@@ -122,7 +122,7 @@
             @endif
 
             @if(in_array(auth()->user()->role,['admin']))
-            </li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+            <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
             <i class="bi bi-shield-check me-2"></i>Admin Panel</a></li>
             <li><a class="dropdown-item {{ request()->routeIs('admin.payments.*') }}"
             href="{{ route('admin.payments.index') }}"><i class="bi bi-wallet me-2"></i>Payments</a></li>

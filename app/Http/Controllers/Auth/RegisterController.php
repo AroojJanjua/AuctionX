@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ class RegisterController extends Controller
     public function register(Request $request){
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+            'email'    => 'required|email:rfc,dns|unique:users,email',            
             'phone'    => 'nullable|string|max:20',
             'role'     => 'required|in:bidder,seller',
             'password' => ['required', 'confirmed', Password::min(8)],
@@ -28,8 +29,9 @@ class RegisterController extends Controller
             'terms'    => 'accepted',
         ], [
             // Custom Error Messages
-            'terms.accepted'   => 'You must accept the Terms of Service to register.',
-            'email.unique'     => 'An account with this email already exists.',
+            'terms.accepted'     => 'You must accept the Terms of Service to register.',
+            'email.unique'       => 'An account with this email already exists.',
+            'email.dns'          => 'This email domain does not appear to accept mail. Please check for typos.',
             'password.confirmed' => 'The passwords you entered do not match.',
         ]);
 
@@ -44,14 +46,10 @@ class RegisterController extends Controller
             'country'  => $request->country,
         ]);
 
+        event(new Registered($user));
         Auth::login($user);
-        
-        // Redirect based on role
-        if($user->role === 'seller'){
-            return redirect()->route('seller.dashboard')->with('success','Welcome to AuctionX! Your seller account is ready.');
-        }
-
-        return redirect()->route('home')->with('success','Welcome to AuctionX! Start exploring auctions.');
-    }
+        return redirect()->route('verification.notice')
+        ->with('success', 'Welcome to AuctionX! Please check your email to verify your account.');
 }
 
+}
