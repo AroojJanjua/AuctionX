@@ -1,0 +1,27 @@
+[33mce419c2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33m361f4d2[m HEAD@{1}: reset: moving to HEAD~1
+[33m7591c80[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{2}: commit: Add Docker + Render deploy config and scheduler trigger route
+[33m361f4d2[m HEAD@{3}: commit: adding shipping address in payment and integrating contact message module and final touch-up
+[33mce419c2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{4}: commit: Added escrow payment system with JazzCash and Easypaisa payment methods
+[33m8667e56[m HEAD@{5}: reset: moving to HEAD~1
+[33m764718f[m HEAD@{6}: reset: moving to 764718f
+[33m764718f[m HEAD@{7}: reset: moving to 764718f
+[33m8667e56[m HEAD@{8}: reset: moving to HEAD~1
+[33m764718f[m HEAD@{9}: commit: Added escrow payment system with JazzCash and Easypaisa payment methods
+[33m8667e56[m HEAD@{10}: commit: add forgot and reset password module and Mailtrap integration
+[33m8cc17fa[m HEAD@{11}: commit: add real-time notification system with Pusher
+[33mefe5943[m HEAD@{12}: commit: Added real-time broadcasting with Pusher across all major pages and now Auctions, bids, approvals and status changes are update instantly without page refresh
+[33m93d87c1[m HEAD@{13}: commit: Completed Admin dashboard and report module
+[33m2d88700[m HEAD@{14}: commit: added bidding feature on auction with bid history, edit profile and auction as well if not bid is placed on auction
+[33ma04c3d5[m HEAD@{15}: commit: Added auction features, seller dashboard and user profile
+[33mb4866f2[m HEAD@{16}: commit: Initial commit on AuctionX project
+[33m460896d[m HEAD@{17}: reset: moving to HEAD~1
+[33m0fcb02b[m HEAD@{18}: Branch: renamed refs/heads/main to refs/heads/main
+[33m0fcb02b[m HEAD@{20}: Branch: renamed refs/heads/main to refs/heads/main
+[33m0fcb02b[m HEAD@{22}: Branch: renamed refs/heads/main to refs/heads/main
+[33m0fcb02b[m HEAD@{24}: Branch: renamed refs/heads/main to refs/heads/main
+[33m0fcb02b[m HEAD@{26}: Branch: renamed refs/heads/main to refs/heads/main
+[33m0fcb02b[m HEAD@{28}: commit: Again initial commit on AuctionX project
+[33m460896d[m HEAD@{29}: Branch: renamed refs/heads/main to refs/heads/main
+[33m460896d[m HEAD@{31}: Branch: renamed refs/heads/master to refs/heads/main
+[33m460896d[m HEAD@{33}: commit (initial): Fixed .gitignore and cleaned tracked files

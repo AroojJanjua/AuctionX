@@ -1,0 +1,89 @@
+@extends('layouts.app')
+@section('title', 'How It Works')
+@section('content')
+
+<div class="page-header">
+  <div class="container">
+    <h2>How AuctionX Works</h2>
+  </div>
+</div>
+
+<div class="container py-5">
+    {{-- Steps --}}
+  <div class="row g-4 mb-5">
+    @foreach([
+      ['1', 'bi-person-plus', 'Create Your Account', 'Sign up as a bidder or seller and create your AuctionX account. Verify your email address and complete your profile to begin.'],
+      ['2', 'bi-grid', 'Browse Listings', 'Discover auctions in categories such as art, watches, vehicles, jewelry, collectibles, and electronics. Browse listings and use filters to find items you are interested in.'],
+      ['3', 'bi-hammer', 'Place Your Bid', 'Choose an auction and enter your bid amount. Your bid must be higher than the current highest bid. You can also use Auto-Bid to automatically place bids for you up to your chosen maximum amount.'],
+      ['4', 'bi-trophy', 'Win the Auction', 'Keep an eye on the auction and place higher bids when needed. When the auction ends, the highest bidder becomes the winner and receives a notification.'],
+      ['5', 'bi-bag-check', 'Complete Secure Payment', 'After winning, complete your payment through AuctionX escrow. The payment is securely held while the order is processed, helping protect both the buyer and seller throughout the transaction.'],
+    ] as [$n, $icon, $title, $desc])
+    <div class="col-md-6 col-lg-4">
+      <div class="step-card">
+        <div class="step-num">{{ $n }}</div>
+        <div class="mb-2" style="font-size:1.6rem;color:var(--br)"><i class="bi {{ $icon }}"></i></div>
+        <div class="step-title mb-2">{{ $title }}</div>
+        <div class="step-desc">{{ $desc }}</div>
+      </div>
+    </div>
+    @endforeach
+  </div>
+  
+  {{-- FAQ --}}
+  <div class="mb-5">
+    <h3 style="font-size:1.2rem;font-weight:800;color:var(--br);margin-bottom:1.5rem">
+      <i class="bi bi-patch-question me-2"></i>Frequently Asked Questions
+    </h3>
+    <div class="accordion" id="faqAccordion">
+      @foreach([
+          ['Is it free to register?',            
+          'Yes, creating an account on AuctionX is completely free for both bidders and sellers.'],
+          ['How do I place a bid?',
+           'Go to any active auction page and enter your bid amount in the "Place Bid" field. Your bid must be higher than the current bid. Click "Place Bid" to confirm. You will receive a notification if you are outbid.'],
+          ['How do I know a bid is valid?',      
+          'All bids are recorded instantly and each bidder is notified if they are outbid. The system automatically validates that each bid exceeds the minimum increment.'],
+          ['What happens when I win an auction?',
+           'When the auction ends and you are the highest bidder, you will see a "Pay Now" button on the auction page. Complete the checkout form, choose JazzCash or EasyPaisa, and follow the payment instructions.'],
+          ['How does the escrow payment work?',
+           'After winning, you send payment to AuctionX\'s JazzCash/EasyPaisa number and submit your Transaction ID. Our admin verifies the payment and holds the funds safely. Once the seller ships and you confirm delivery, the payment is automatically released to the seller.'],
+          ['What if my item does not arrive?',
+           'If your item has not arrived within the expected delivery period, do NOT confirm delivery. Instead raise a dispute from your Order Status page. Our admin team will investigate and either arrange a refund or resolve the issue with the seller.'],
+          ['How do I become a seller?',
+           'During registration, select "Seller" as your role. Once registered, you can access your Seller Dashboard from the navigation menu and create your first listing.'],
+          ['How do I list an item for sale?',    
+          'Register as a seller, go to your Seller Dashboard and click "New Listing". Fill in your item details, set your pricing and schedule, then publish.'],
+          ['Can I cancel a bid after placing it?',
+           'No, bids on AuctionX are binding and cannot be cancelled once placed.'],
+          ] as $i => [$q, $a])
+      <div class="accordion-item" 
+      style="border:1px solid var(--border);border-radius:10px!important;margin-bottom:8px;overflow:hidden">
+        <h2 class="accordion-header">
+          <button class="accordion-button {{ $i > 0 ? 'collapsed' : '' }}"
+                  type="button" data-bs-toggle="collapse"
+                  data-bs-target="#faq{{ $i }}"
+                  style="font-weight:700;font-size:0.9rem;color:var(--text);background:#fff">
+            {{ $q }}
+          </button>
+        </h2>
+        <div id="faq{{ $i }}" class="accordion-collapse collapse {{ $i === 0 ? 'show' : '' }}"
+             data-bs-parent="#faqAccordion">
+          <div class="accordion-body" style="font-size:0.88rem;color:var(--muted)">{{ $a }}</div>
+        </div>
+      </div>
+      @endforeach
+    </div>
+  </div>
+
+  {{-- CTA --}}
+  <div class="text-center py-4" style="background:var(--br-pale);border-radius:16px;border:1px solid var(--br-soft)">
+    <h3 style="font-size:1.3rem;font-weight:800;color:var(--br)">Ready to start bidding?</h3>
+    <p style="color:var(--muted);font-size:0.9rem">Join thousands of bidders and sellers on AuctionX today.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{{ route('register') }}" class="btn btn-brown px-5 py-2">Create Account</a>
+      <a href="{{ route('auctions.index') }}" class="btn btn-brown-outline px-5 py-2">Browse Auctions</a>
+    </div>
+  </div>
+
+</div>
+
+@endsection
